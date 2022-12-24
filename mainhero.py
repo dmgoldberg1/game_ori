@@ -1,6 +1,6 @@
 import os
 import sys
-
+import time
 import pygame
 from utilities import load_image
 
@@ -33,7 +33,8 @@ class MainHero(pygame.sprite.Sprite):
                       'карабкается': False}
         self.image = MainHero.image
         self.collision = False
-        self.continue_moving = False
+        self.continue_moving_x = False
+        self.continue_moving_y = True
         self.rect = self.image.get_rect()
         self.rect.x = coords[0]
         self.rect.y = coords[1]
@@ -52,6 +53,7 @@ class MainHero(pygame.sprite.Sprite):
                       1073741904: -8,
                       1073741903: 8}
 
+        # обработка пересечений
         self.collision = False
 
         for i in self.platform_sprite_group:
@@ -60,18 +62,22 @@ class MainHero(pygame.sprite.Sprite):
             #     print('aaaa')
             if pygame.sprite.collide_mask(self, i):
                 place_collide = pygame.sprite.collide_mask(self, i)
-                if place_collide[1] > self.image.get_rect()[3] - 30:
+                print(place_collide)
+                if (place_collide[1] > self.image.get_rect()[3] - 30) and self.continue_moving_y:
                     self.state['на земле'] = True
                     self.collision = True
-                elif place_collide[1] < self.image.get_rect()[3] - 80:
+                    self.continue_moving_y = True
+                elif (place_collide[1] < self.image.get_rect()[3] - 60) and self.continue_moving_y:
                     self.y_vel = - (self.y_vel) * 0.8
+                    self.continue_moving_y = False
+                # if place_collide[0] < 10 and place_collide[1] <
         if not self.collision:
             self.state['на земле'] = False
 
-        # тестовое движение
+        # обработка событий
         if args:
             if args[0].type == pygame.KEYDOWN:
-                self.continue_moving = True
+                self.continue_moving_x = True
 
                 if self.state['на земле']:
                     if args[0].key in ud_buttons:
@@ -82,17 +88,17 @@ class MainHero(pygame.sprite.Sprite):
                     self.x_vel = lr_buttons[args[0].key]
 
             if args[0].type == pygame.KEYUP:
-                self.continue_moving = False
+                self.continue_moving_x = False
                 if self.state['на земле']:
                     self.x_vel = 0
 
-        # симуляция гравитации
-        # стопить при поверхности
+        # обработка статуса положения
         if not self.state['на земле']:
             self.y_vel += 2
+            self.continue_moving_y = True
         else:
             self.y_vel = 0
-            if not self.continue_moving:
+            if not self.continue_moving_x:
                 if 1 > abs(self.x_vel) > 0:
                     self.x_vel -= 2 * (self.x_vel / abs(self.x_vel))
                 else:
@@ -101,7 +107,8 @@ class MainHero(pygame.sprite.Sprite):
         # надо это фиксить, делать всё через if-else будет ппц запарно
         self.rect = self.rect.move(self.x_vel, self.y_vel)
 
-        if self.rect.y > HEIGHT:
+        # упал - умер - возродился
+        if self.rect.y > HEIGHT:         # HEIGHT - берется из файла mainhero.py
             self.kill()
             MainHero(self.group, self.platform_sprite_group, (600, 250))
 
