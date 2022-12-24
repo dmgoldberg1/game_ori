@@ -1,11 +1,7 @@
-import pygame
 import os
 import sys
+import pygame
 from utilities import load_image
-
-# загрузка изображений (пока не анимашки)
-
-
 
 # настройки окна
 size = WIDTH, HEIGHT = 500, 500
@@ -24,7 +20,7 @@ platform_sprites = pygame.sprite.Group()
 # класс платформы
 class Platform(pygame.sprite.Sprite):
     # картинка
-    image = load_image("platform.jpg", colorkey=(255, 255, 255))
+    image = load_image("platform_test.png", colorkey=(0, 0, 0))
     image = pygame.transform.scale(image, (200, 200))
 
     def __init__(self, group, special_group, coords, image=image):
