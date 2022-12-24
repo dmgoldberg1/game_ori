@@ -1,8 +1,20 @@
-import pygame
 import os
 import sys
-from platform import Platform
+import pygame
 from utilities import load_image
+
+# настройки окна
+size = WIGHT, HEIGHT = 1000, 600
+FPS = 20
+screen = pygame.display.set_mode(size)
+running = True
+clock = pygame.time.Clock()
+
+pygame.init()
+
+# спрайты
+all_sprites = pygame.sprite.Group()
+platform_sprites = pygame.sprite.Group()
 
 
 # класс героя
@@ -74,3 +86,29 @@ class MainHero(pygame.sprite.Sprite):
         if self.rect.y > HEIGHT:
             self.kill()
             MainHero(self.group, (500, 250))
+
+
+# добавление героя в спрайты
+MainHero(all_sprites, (200, 100))
+
+# запуск симуляции
+if __name__ == '__main__':
+    while running:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            # if event.type == pygame.KEYDOWN:
+            #     print(event.key)
+
+            # отрисовка спрайта
+            all_sprites.update(event)
+
+        # зарисовка и загрузочный апдейт
+        screen.fill((255, 255, 255))
+        all_sprites.update()
+        all_sprites.draw(screen)
+        pygame.display.flip()
+
+    pygame.quit()
