@@ -1,5 +1,6 @@
 import os
 import sys
+
 import pygame
 from utilities import load_image
 
@@ -54,14 +55,16 @@ class MainHero(pygame.sprite.Sprite):
         self.collision = False
 
         for i in self.platform_sprite_group:
+            # if self.mask.overlap_area(i.mask, (
+            # i.image.get_rect().x - self.image.get_rect().x, i.image.get_rect().y - self.image.get_rect().y)):
+            #     print('aaaa')
             if pygame.sprite.collide_mask(self, i):
                 place_collide = pygame.sprite.collide_mask(self, i)
-                print(self.image.get_rect()[0:4], place_collide)
                 if place_collide[1] > self.image.get_rect()[3] - 30:
                     self.state['на земле'] = True
                     self.collision = True
                 elif place_collide[1] < self.image.get_rect()[3] - 80:
-                    self.y_vel = - (self.y_vel) // 2
+                    self.y_vel = - (self.y_vel) * 0.8
         if not self.collision:
             self.state['на земле'] = False
 
@@ -104,7 +107,7 @@ class MainHero(pygame.sprite.Sprite):
 
 
 # добавление героя в спрайты
-MainHero(all_sprites, platform_sprites,(200, 100))
+MainHero(all_sprites, platform_sprites, (200, 100))
 
 # запуск симуляции
 if __name__ == '__main__':
