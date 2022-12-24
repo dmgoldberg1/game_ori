@@ -21,14 +21,16 @@ platform_sprites = pygame.sprite.Group()
 class Platform(pygame.sprite.Sprite):
     # картинка
     image = load_image("platform_test.png", colorkey=(0, 0, 0))
-    image = pygame.transform.scale(image, (200, 200))
+    image = pygame.transform.scale(image, (150, 100))
 
-    def __init__(self, group, special_group, coords, image=image):
+    def __init__(self, group, special_group, coords, image=image, image_scale = None):
         super().__init__(group)
         self.image = image
+        if image_scale:
+            self.image = pygame.transform.scale(self.image, image_scale)
         self.rect = self.image.get_rect()
-        self.rect.x = coords[0]
-        self.rect.y = coords[1]
+        self.rect.x = coords[0] * 100 - 50
+        self.rect.y = coords[1] * 100 - 50
 
         # self.x_vel = 0
         # self.y_vel = 0
@@ -44,7 +46,7 @@ class Platform(pygame.sprite.Sprite):
 
 
 # добавление платформы в спрайты
-Platform(all_sprites, platform_sprites, (250, 250))
+Platform(all_sprites, platform_sprites, (0, 0))
 
 if __name__ == '__main__':
     while running:
