@@ -11,7 +11,7 @@ from utilities import load_image
 # класс героя
 class MainHero(pygame.sprite.Sprite):
     # картинка
-    image = load_image("mussolini.jpg", colorkey=(255, 255, 255))
+    image = load_image("temp.png", colorkey=(255, 255, 255))
     image = pygame.transform.scale(image, (100, 100))
 
     def __init__(self, group, coords):

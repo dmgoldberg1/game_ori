@@ -24,7 +24,7 @@ platform_sprites = pygame.sprite.Group()
 # класс платформы
 class Platform(pygame.sprite.Sprite):
     # картинка
-    image = load_image("platform.png", colorkey=(255, 255, 255))
+    image = load_image("platform.jpg", colorkey=(255, 255, 255))
     image = pygame.transform.scale(image, (200, 200))
 
     def __init__(self, group, special_group, coords, image=image):

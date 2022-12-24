@@ -2,6 +2,7 @@ import sys
 import os
 import pygame
 
+
 def load_image(name, colorkey=None):
     # сменить на texture\{папка с анимацией} и потом загружать кадры из папки
     fullname = os.path.join('data', name)
@@ -18,3 +19,11 @@ def load_image(name, colorkey=None):
     else:
         image = image.convert_alpha()
     return image
+
+
+class Background(pygame.sprite.Sprite):
+    def __init__(self, image_file, location):
+        pygame.sprite.Sprite.__init__(self)  # call Sprite initializer
+        self.image = load_image(image_file)
+        self.rect = self.image.get_rect()
+        self.rect.left, self.rect.top = location
