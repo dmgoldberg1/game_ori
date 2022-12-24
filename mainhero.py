@@ -1,7 +1,7 @@
 import pygame
 import os
 import sys
-from main import Platform
+from platform import Platform
 
 
 # загрузка изображений (пока не анимашки)
@@ -26,7 +26,8 @@ def load_image(name, colorkey=None):
 # класс героя
 class MainHero(pygame.sprite.Sprite):
     # картинка
-    image = load_image("hero.png", colorkey=(255, 255, 255))
+    image = load_image("mussolini.jpg", colorkey=(255, 255, 255))
+    image = pygame.transform.scale(image, (100, 100))
 
     def __init__(self, group, coords):
         super().__init__(group)
@@ -93,7 +94,7 @@ class MainHero(pygame.sprite.Sprite):
 
 
 # настройки окна
-size = WIGHT, HEIGHT = 1000, 800
+size = WIGHT, HEIGHT = 1000, 600
 FPS = 20
 screen = pygame.display.set_mode(size)
 running = True
@@ -106,8 +107,8 @@ all_sprites = pygame.sprite.Group()
 platform_sprites = pygame.sprite.Group()
 
 # добавление героя в спрайты
-MainHero(all_sprites, (500, 250))
-Platform(all_sprites, platform_sprites, (500, 500))
+MainHero(all_sprites, (200, 100))
+Platform(all_sprites, platform_sprites, (200, 400))
 
 mainhero_status = [True]
 # запуск симуляции
