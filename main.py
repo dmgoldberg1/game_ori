@@ -31,7 +31,7 @@ def generate_level(level):
 
 # настройки окна
 pygame.init()
-size = WIGHT, HEIGHT = 1000, 600
+size = WIDHT, HEIGHT = 1000, 600
 FPS = 30
 screen = pygame.display.set_mode(size)
 running = True

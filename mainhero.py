@@ -1,11 +1,12 @@
 import os
 import sys
 import time
+
 import pygame
 from utilities import load_image
 
 # настройки окна
-size = WIGHT, HEIGHT = 1000, 600
+size = WIDHT, HEIGHT = 1000, 600
 FPS = 20
 screen = pygame.display.set_mode(size)
 running = True
@@ -22,7 +23,7 @@ platform_sprites = pygame.sprite.Group()
 class MainHero(pygame.sprite.Sprite):
     # картинка
     image = load_image("cat_hero.png", colorkey=(255, 255, 255))
-    print(image.get_rect())
+    # print(image.get_rect())
     image = pygame.transform.scale(image, (151 // 2, 186 // 2))
 
     def __init__(self, group, platform_sprite_group, coords):
@@ -32,12 +33,22 @@ class MainHero(pygame.sprite.Sprite):
         self.state = {'на земле': True,
                       'карабкается': False}
         self.image = MainHero.image
+
+        # константы
         self.collision = False
         self.continue_moving_x = False
         self.continue_moving_y = True
+
+        # расположение на экране
         self.rect = self.image.get_rect()
         self.rect.x = coords[0]
         self.rect.y = coords[1]
+
+        # характеритики
+        self.hero_widht = self.image.get_rect()[2]
+        self.hero_height = self.image.get_rect()[3]
+
+        self.last_position = (self.rect.x, self.rect.y, self.rect.x + self.rect.w, self.rect.y + self.rect.h)
 
         self.x_vel = 0
         self.y_vel = 0
@@ -45,6 +56,9 @@ class MainHero(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self, *args):
+
+        self.position = (self.rect.x, self.rect.y, self.rect.x + self.rect.w, self.rect.y + self.rect.h)
+
         # up, down кнопки
         ud_buttons = [119, 1073741906]
         # left, right кнопки
@@ -57,20 +71,28 @@ class MainHero(pygame.sprite.Sprite):
         self.collision = False
 
         for i in self.platform_sprite_group:
-            # if self.mask.overlap_area(i.mask, (
-            # i.image.get_rect().x - self.image.get_rect().x, i.image.get_rect().y - self.image.get_rect().y)):
-            #     print('aaaa')
-            if pygame.sprite.collide_mask(self, i):
-                place_collide = pygame.sprite.collide_mask(self, i)
-                print(place_collide)
-                if (place_collide[1] > self.image.get_rect()[3] - 30) and self.continue_moving_y:
-                    self.state['на земле'] = True
-                    self.collision = True
-                    self.continue_moving_y = True
-                elif (place_collide[1] < self.image.get_rect()[3] - 60) and self.continue_moving_y:
-                    self.y_vel = - (self.y_vel) * 0.8
-                    self.continue_moving_y = False
-                # if place_collide[0] < 10 and place_collide[1] <
+            platform_position = (i.rect.x, i.rect.y, i.rect.x + i.rect.w, i.rect.y + i.rect.h)
+            # print(platform_position)
+
+            if self.last_position[1] < platform_position[2] <= self.position[3] and (
+                    platform_position[0] <= self.position[0] <= platform_position[2] and
+                    platform_position[0] <= self.position[2] <= platform_position[2]):
+                self.state['на земле'] = True
+                self.rect = self.rect.move(0, platform_position[2] - self.position[3])
+                self.y_vel = 0
+            # if pygame.sprite.collide_mask(self, i):
+            #     place_collide = pygame.sprite.collide_mask(self, i)
+            #     place_collide_for_height, place_collide_for_widht = place_collide[0], place_collide[1]
+            #     # print(place_collide)
+            #     if (self.hero_height - 30 < place_collide_for_height <= self.hero_height) and self.continue_moving_y:
+            #         self.rect = self.rect.move(0, place_collide[1] - self.image.get_rect()[3])
+            #         self.state['на земле'] = True
+            #         self.collision = True
+            #         self.continue_moving_y = True
+            #     elif (place_collide[1] < self.image.get_rect()[3] - 60) and self.continue_moving_y:
+            #         self.y_vel = - (self.y_vel) * 0.8
+            #         self.continue_moving_y = False
+            # if place_collide[0] < 10 and place_collide[1] <
         if not self.collision:
             self.state['на земле'] = False
 
@@ -108,9 +130,12 @@ class MainHero(pygame.sprite.Sprite):
         self.rect = self.rect.move(self.x_vel, self.y_vel)
 
         # упал - умер - возродился
-        if self.rect.y > HEIGHT:         # HEIGHT - берется из файла mainhero.py
+        if self.rect.y > HEIGHT:  # HEIGHT - берется из файла mainhero.py
             self.kill()
             MainHero(self.group, self.platform_sprite_group, (600, 250))
+
+        # запоминаем старую позицию
+        self.last_position = self.position
 
 
 # добавление героя в спрайты
