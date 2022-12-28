@@ -48,66 +48,34 @@ class MainHero(pygame.sprite.Sprite):
         self.hero_widht = self.image.get_rect()[2]
         self.hero_height = self.image.get_rect()[3]
 
-        self.last_position = (self.rect.x, self.rect.y, self.rect.x + self.rect.w, self.rect.y + self.rect.h)
+        self.last_position = pygame.Rect(self.rect)
 
         self.x_vel = 0
         self.y_vel = 0
 
         self.mask = pygame.mask.from_surface(self.image)
 
-    def update(self, *args):
-
-        self.position = (self.rect.x, self.rect.y, self.rect.x + self.rect.w, self.rect.y + self.rect.h)
-
         # up, down кнопки
-        ud_buttons = [119, 1073741906]
+        self.ud_buttons = [119, 1073741906]
         # left, right кнопки
-        lr_buttons = {97: -8,
-                      100: 8,
-                      1073741904: -8,
-                      1073741903: 8}
+        self.lr_buttons = {97: -8,
+                           100: 8,
+                           1073741904: -8,
+                           1073741903: 8}
 
-        # обработка пересечений
-        self.collision = False
-
-        for i in self.platform_sprite_group:
-            platform_position = (i.rect.x, i.rect.y, i.rect.x + i.rect.w, i.rect.y + i.rect.h)
-            # print(platform_position)
-
-            if self.last_position[1] < platform_position[2] <= self.position[3] and (
-                    platform_position[0] <= self.position[0] <= platform_position[2] and
-                    platform_position[0] <= self.position[2] <= platform_position[2]):
-                self.state['на земле'] = True
-                self.rect = self.rect.move(0, platform_position[2] - self.position[3])
-                self.y_vel = 0
-            # if pygame.sprite.collide_mask(self, i):
-            #     place_collide = pygame.sprite.collide_mask(self, i)
-            #     place_collide_for_height, place_collide_for_widht = place_collide[0], place_collide[1]
-            #     # print(place_collide)
-            #     if (self.hero_height - 30 < place_collide_for_height <= self.hero_height) and self.continue_moving_y:
-            #         self.rect = self.rect.move(0, place_collide[1] - self.image.get_rect()[3])
-            #         self.state['на земле'] = True
-            #         self.collision = True
-            #         self.continue_moving_y = True
-            #     elif (place_collide[1] < self.image.get_rect()[3] - 60) and self.continue_moving_y:
-            #         self.y_vel = - (self.y_vel) * 0.8
-            #         self.continue_moving_y = False
-            # if place_collide[0] < 10 and place_collide[1] <
-        if not self.collision:
-            self.state['на земле'] = False
-
+    def update(self, *args):
         # обработка событий
         if args:
             if args[0].type == pygame.KEYDOWN:
                 self.continue_moving_x = True
 
                 if self.state['на земле']:
-                    if args[0].key in ud_buttons:
+                    if args[0].key in self.ud_buttons:
                         self.y_vel = -33
                         self.state['на земле'] = False
 
-                if args[0].key in lr_buttons:
-                    self.x_vel = lr_buttons[args[0].key]
+                if args[0].key in self.lr_buttons:
+                    self.x_vel = self.lr_buttons[args[0].key]
 
             if args[0].type == pygame.KEYUP:
                 self.continue_moving_x = False
@@ -126,8 +94,69 @@ class MainHero(pygame.sprite.Sprite):
                 else:
                     self.x_vel = 0
 
-        # надо это фиксить, делать всё через if-else будет ппц запарно
+        # обработка пересечений
+        self.collision = False
+
         self.rect = self.rect.move(self.x_vel, self.y_vel)
+        self.position = pygame.Rect(self.rect)
+
+        # print(self.position, '     ',self.last_position)
+
+        for i in self.platform_sprite_group:
+            # print(i.mask.get_bounding_rects()[0])
+            a, b, c, d = i.mask.get_bounding_rects()[0][:4]
+            platform_rect = pygame.Rect(i.rect[0] + a, i.rect[1] + b + 5, c, d)
+
+            # линия пересечения персонажа по 4 направлениям
+            down_hero_line = ((self.position.centerx, self.position.bottom),
+                              (self.last_position.centerx, self.last_position.bottom))
+            up_hero_line = ((self.position.centerx, self.position.top),
+                            (self.last_position.centerx, self.last_position.top))
+            left_hero_line = ((self.position.left, self.position.centery),
+                              (self.last_position.left, self.last_position.centery))
+            right_hero_line = ((self.position.right, self.position.centery),
+                               (self.last_position.right, self.last_position.centery))
+
+            # поиск пересечения персонажем по 4 направлениям
+            collide_down = platform_rect.clipline(down_hero_line)
+            collide_up = platform_rect.clipline(up_hero_line)
+            collide_left = platform_rect.clipline(left_hero_line)
+            collide_right = platform_rect.clipline(right_hero_line)
+
+            # print(collide, line, platform_rect)
+            if any([collide_down, collide_up, collide_left, collide_right]):
+                # обработка пересечения с низом персонажа
+                if collide_down:
+                    print('d')
+                    if not self.continue_moving_y:
+                        self.y_vel = 0
+                    self.continue_moving_y = True
+                    self.state['на земле'] = True
+                    self.rect.move((collide_down[0][0]) - self.rect.x,
+                                   (collide_down[0][1]) - self.rect.y)
+                    # self.rect = pygame.Rect(collide_down[-1][0] - self.rect.width // 2,
+                    #                         collide_down[-1][1] - self.rect.height,
+                    #                         self.rect.width, self.rect.height)
+                # обработка пересечения с верхом персонажа
+                elif collide_up:
+                    print('u')
+                    self.y_vel = - self.y_vel * 0.9
+                    self.continue_moving_y = False
+                    self.state['на земле'] = False
+                    self.rect.move(collide_up[0][0] - self.rect.width // 2,
+                                   collide_up[0][1])
+                    # self.rect = pygame.Rect(collide_down[0][0] - self.rect.width // 2,
+                    #                          collide_down[0][1] - self.rect.height,
+                    #                          self.rect.width, self.rect.height)
+                # обработка пересечения с левом персонажа
+                elif collide_left:
+                    print('l')
+                    # self.rect = pygame.Rect(collide[-1][0] - self.rect[2] // 2, self.rect.y,
+                    #                         self.rect[2], self.rect[3])
+                # обработка пересечения с правом персонажа
+                elif collide_right:
+                    print('r')
+                self.position = pygame.Rect(self.rect)
 
         # упал - умер - возродился
         if self.rect.y > HEIGHT:  # HEIGHT - берется из файла mainhero.py

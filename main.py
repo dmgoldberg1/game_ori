@@ -93,8 +93,8 @@ settings = pygame.sprite.Group()
 # настройки
 Button(settings, [0, 0], [40, 40], '->', [15, 20], menu)
 # меню
-Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Играть', [45, 15], all_sprites)
-Button(menu, [WIGHT // 2 - 200, 250], [350, 70], 'Настройки', [70, 15], settings)
+Button(menu, [WIDHT // 2 - 200, 150], [350, 70], 'Играть', [45, 15], all_sprites)
+Button(menu, [WIDHT // 2 - 200, 250], [350, 70], 'Настройки', [70, 15], settings)
 Button(menu, [0, 0], [40, 40], '->', [15, 20])
 # игру
 Button(all_sprites, [0, 0], [40, 40], '->', [15, 20], menu)
@@ -106,6 +106,8 @@ active_sprites = menu
 MainHero(all_sprites, platform_sprites, (200, 100))
 generate_level(load_level('map.txt'))
 
+active_sprites = all_sprites
+
 # запуск симуляции
 if __name__ == '__main__':
     while running:
@@ -113,6 +115,8 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            # if event.type == pygame.KEYDOWN:
+            #     print(event)
 
             # отрисовка спрайтов
             active_sprites.update(event)

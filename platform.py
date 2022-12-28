@@ -29,6 +29,7 @@ class Platform(pygame.sprite.Sprite):
         if image_scale:
             self.image = pygame.transform.scale(self.image, image_scale)
         self.rect = self.image.get_rect()
+        print(self.image.get_rect())
         self.rect.x = coords[0] * 100 - 50
         self.rect.y = coords[1] * 100 - 50
 
