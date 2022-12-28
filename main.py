@@ -2,14 +2,14 @@
 import pygame
 
 # классы-работники
-from platform import Platform
+from Platform import Platform
 from mainhero import MainHero
 from utilities import Background
 
 
 # кнопка
 class Button(pygame.sprite.Sprite):
-    def __init__(self, group, coords, size, description, offset, linked_page=False):
+    def __init__(self, group, coords, size, description, linked_page=False):
         super().__init__(group)
 
         # цвет всех кнопок (можно менять)
@@ -19,7 +19,7 @@ class Button(pygame.sprite.Sprite):
         # текст (можно менять настройки)
         f1 = pygame.font.SysFont('arial', 36)
         text1 = f1.render(description, True, (255, 0, 0))
-        self.image.blit(text1, (size[0] // 2 - offset[0], size[1] // 2 - offset[1]))
+        self.image.blit(text1, ((size[0] - text1.get_width()) // 2, (size[1] - text1.get_height()) // 2))
 
         # координаты
         self.rect = self.image.get_rect()
@@ -91,13 +91,13 @@ settings = pygame.sprite.Group()
 
 # загружаем кнопками:
 # настройки
-Button(settings, [0, 0], [40, 40], '->', [15, 20], menu)
+Button(settings, [0, 0], [40, 40], '->', menu)
 # меню
-Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Играть', [45, 15], all_sprites)
-Button(menu, [WIGHT // 2 - 200, 250], [350, 70], 'Настройки', [70, 15], settings)
-Button(menu, [0, 0], [40, 40], '->', [15, 20])
+Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Играть', all_sprites)
+Button(menu, [WIGHT // 2 - 200, 250], [350, 70], 'Настройки', settings)
+Button(menu, [0, 0], [40, 40], '->')
 # игру
-Button(all_sprites, [0, 0], [40, 40], '->', [15, 20], menu)
+Button(all_sprites, [0, 0], [40, 40], '->', menu)
 
 # активное окно
 active_sprites = menu
