@@ -65,7 +65,7 @@ class MainHero(pygame.sprite.Sprite):
     def update(self, *args):
         # обработка событий
         if args:
-            if args[0].type == pygame.KEYDOWN:
+            if args[0].type == pygame.KEYDOWN and timer_nps[0]:
                 self.continue_moving_x = True
 
                 if self.state['на земле']:
@@ -131,27 +131,30 @@ class MainHero(pygame.sprite.Sprite):
                         self.state['на земле'] = True
                         self.rect = self.rect.move((collide_down[-1][0] - self.rect.width // 2) - self.rect.x,
                                                    (collide_down[-1][1] - self.rect.height) - self.rect.y)
-                    self.rect = pygame.Rect(collide_down[-1][0] - self.rect.width // 2,
-                                            collide_down[-1][1] - self.rect.height,
-                                            self.rect.width, self.rect.height)
+                    # self.rect = pygame.Rect(collide_down[-1][0] - self.rect.width // 2,
+                    #                         collide_down[-1][1] - self.rect.height,
+                    #                         self.rect.width, self.rect.height)
                 # обработка пересечения с верхом персонажа
                 elif collide_up:
                     print('u')
                     self.y_vel = - self.y_vel * 0.9
                     self.state['на земле'] = False
+                    print(collide_up)
                     self.rect.move(collide_up[0][0] - self.rect.width // 2,
                                    collide_up[0][1])
-                    self.rect = pygame.Rect(collide_down[0][0] - self.rect.width // 2,
-                                            collide_down[0][1] - self.rect.height,
+                    self.rect = pygame.Rect(collide_up[0][0] - self.rect.width // 2,
+                                            collide_up[0][1] - self.rect.height,
                                             self.rect.width, self.rect.height)
                 # обработка пересечения с левом персонажа
                 elif collide_left:
                     print('l')
-                    self.rect = pygame.Rect(collide[-1][0] - self.rect[2] // 2, self.rect.y,
-                                            self.rect[2], self.rect[3])
+                    # self.rect = pygame.Rect(collide[-1][0] - self.rect[2] // 2, self.rect.y,
+                    #                         self.rect[2], self.rect[3])
                 # обработка пересечения с правом персонажа
                 elif collide_right:
                     print('r')
+                    # self.rect = pygame.Rect(collide[-1][0] - self.rect[2] // 2, self.rect.y,
+                    #                         self.rect[2], self.rect[3])
                 self.position = pygame.Rect(self.rect)
 
         # упал - умер - возродился
