@@ -43,6 +43,39 @@ class Button(pygame.sprite.Sprite):
                 running = False
 
 
+class InputBox(pygame.sprite.Sprite):
+    def __init__(self, group, x, y, w, h, text=''):
+        super().__init__(group)
+        self.f = pygame.font.SysFont('arial', 36)
+        self.image = pygame.Surface([w, h])
+        self.image.fill((0, 0, 0))
+        self.rect = pygame.Rect(x, y, w, h)
+        self.text = text
+        self.txt_surface = self.f.render(text, True, (255, 0, 0))
+        self.active = False
+
+    def update(self, *evento):
+        if evento:
+            event = evento[0]
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # If the user clicked on the input_box rect.
+                if self.rect.collidepoint(event.pos):
+                    # Toggle the active variable.
+                    self.active = not self.active
+                else:
+                    self.active = False
+                # Change the current color of the input box.
+            if event.type == pygame.KEYDOWN:
+                if self.active:
+                    if event.key == pygame.K_RETURN:
+                        print(self.text)
+                        self.text = ''
+                    else:
+                        self.text = event.unicode
+
+                    self.txt_surface = self.f.render(self.text, True, (255, 0, 0))
+
+
 # вставил кноки в main, потому что привязка к running и active_sprites
 # неудобна через импорт, простите
 
@@ -92,6 +125,7 @@ settings = pygame.sprite.Group()
 # загружаем кнопками:
 # настройки
 Button(settings, [0, 0], [40, 40], '->', menu)
+InputBox(settings, 100, 100, 40, 40)
 # меню
 Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Играть', all_sprites)
 Button(menu, [WIGHT // 2 - 200, 250], [350, 70], 'Настройки', settings)
