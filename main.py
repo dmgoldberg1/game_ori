@@ -1,4 +1,4 @@
-# pygame
+ pygame
 import pygame
 
 # классы-работники
@@ -30,17 +30,24 @@ class Button(pygame.sprite.Sprite):
         self.linked_page = linked_page
 
     def update(self, *args):
+        global active_sprites
+        global running
         # реакция на клик
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
 
             # сделал такую проверку на выход из игры
             if self.linked_page:
-                global active_sprites
                 active_sprites = self.linked_page
             else:
-                global running
                 running = False
+
+        elif args and args[0].type == pygame.KEYDOWN:
+            if args[0].key == 27:
+                if self.linked_page:
+                    active_sprites = self.linked_page
+                else:
+                    running = False
 
 
 class InputBox(pygame.sprite.Sprite):
