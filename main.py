@@ -1,15 +1,15 @@
-# pygame
+ pygame
 import pygame
 
 # классы-работники
-from platform import Platform
+from Platform import Platform
 from mainhero import MainHero
 from utilities import Background
 
 
 # кнопка
 class Button(pygame.sprite.Sprite):
-    def __init__(self, group, coords, size, description, offset, linked_page=False):
+    def __init__(self, group, coords, size, description, linked_page=False):
         super().__init__(group)
 
         # цвет всех кнопок (можно менять)
@@ -19,7 +19,7 @@ class Button(pygame.sprite.Sprite):
         # текст (можно менять настройки)
         f1 = pygame.font.SysFont('arial', 36)
         text1 = f1.render(description, True, (255, 0, 0))
-        self.image.blit(text1, (size[0] // 2 - offset[0], size[1] // 2 - offset[1]))
+        self.image.blit(text1, ((size[0] - text1.get_width()) // 2, (size[1] - text1.get_height()) // 2))
 
         # координаты
         self.rect = self.image.get_rect()
@@ -30,17 +30,57 @@ class Button(pygame.sprite.Sprite):
         self.linked_page = linked_page
 
     def update(self, *args):
+        global active_sprites
+        global running
         # реакция на клик
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
 
             # сделал такую проверку на выход из игры
             if self.linked_page:
-                global active_sprites
                 active_sprites = self.linked_page
             else:
-                global running
                 running = False
+
+        elif args and args[0].type == pygame.KEYDOWN:
+            if args[0].key == 27:
+                if self.linked_page:
+                    active_sprites = self.linked_page
+                else:
+                    running = False
+
+
+class InputBox(pygame.sprite.Sprite):
+    def __init__(self, group, x, y, w, h, text=''):
+        super().__init__(group)
+        self.f = pygame.font.SysFont('arial', 36)
+        self.image = pygame.Surface([w, h])
+        self.image.fill((0, 0, 0))
+        self.rect = pygame.Rect(x, y, w, h)
+        self.text = text
+        self.txt_surface = self.f.render(text, True, (255, 0, 0))
+        self.active = False
+
+    def update(self, *evento):
+        if evento:
+            event = evento[0]
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # If the user clicked on the input_box rect.
+                if self.rect.collidepoint(event.pos):
+                    # Toggle the active variable.
+                    self.active = not self.active
+                else:
+                    self.active = False
+                # Change the current color of the input box.
+            if event.type == pygame.KEYDOWN:
+                if self.active:
+                    if event.key == pygame.K_RETURN:
+                        print(self.text)
+                        self.text = ''
+                    else:
+                        self.text = event.unicode
+
+                    self.txt_surface = self.f.render(self.text, True, (255, 0, 0))
 
 
 # вставил кноки в main, потому что привязка к running и active_sprites
@@ -73,7 +113,7 @@ def generate_level(level):
 ########################################################################################################################
 # настройки окна
 pygame.init()
-size = WIDHT, HEIGHT = 1000, 600
+size = WIGHT, HEIGHT = 1000, 600
 FPS = 30
 screen = pygame.display.set_mode(size)
 running = True
@@ -91,13 +131,14 @@ settings = pygame.sprite.Group()
 
 # загружаем кнопками:
 # настройки
-Button(settings, [0, 0], [40, 40], '->', [15, 20], menu)
+Button(settings, [0, 0], [40, 40], '->', menu)
+InputBox(settings, 100, 100, 40, 40)
 # меню
-Button(menu, [WIDHT // 2 - 200, 150], [350, 70], 'Играть', [45, 15], all_sprites)
-Button(menu, [WIDHT // 2 - 200, 250], [350, 70], 'Настройки', [70, 15], settings)
-Button(menu, [0, 0], [40, 40], '->', [15, 20])
+Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Играть', all_sprites)
+Button(menu, [WIGHT // 2 - 200, 250], [350, 70], 'Настройки', settings)
+Button(menu, [0, 0], [40, 40], '->')
 # игру
-Button(all_sprites, [0, 0], [40, 40], '->', [15, 20], menu)
+Button(all_sprites, [0, 0], [40, 40], '->', menu)
 
 # активное окно
 active_sprites = menu
@@ -106,8 +147,6 @@ active_sprites = menu
 MainHero(all_sprites, platform_sprites, (200, 100))
 generate_level(load_level('map.txt'))
 
-active_sprites = all_sprites
-
 # запуск симуляции
 if __name__ == '__main__':
     while running:
@@ -115,8 +154,6 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            # if event.type == pygame.KEYDOWN:
-            #     print(event)
 
             # отрисовка спрайтов
             active_sprites.update(event)
