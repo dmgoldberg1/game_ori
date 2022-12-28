@@ -1,10 +1,13 @@
 # pygame
 import pygame
-
+import time
 # классы-работники
 from platform import Platform
 from mainhero import MainHero
-from utilities import Background
+from utilities import Background, sprite_distance
+from npc import NPC, Enemy, PathCosine
+from data import timer_npc
+import pygame_ai as pai
 
 
 # кнопка
@@ -85,6 +88,7 @@ BackGround = Background('forest.jpg', [0, 0])
 # игра
 all_sprites = pygame.sprite.Group()
 platform_sprites = pygame.sprite.Group()
+main_hero_sprite = pygame.sprite.Group()
 # меню
 menu = pygame.sprite.Group()
 settings = pygame.sprite.Group()
@@ -95,16 +99,26 @@ Button(settings, [0, 0], [40, 40], '->', [15, 20], menu)
 # меню
 Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Играть', [45, 15], all_sprites)
 Button(menu, [WIGHT // 2 - 200, 250], [350, 70], 'Настройки', [70, 15], settings)
+Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Обучение', [25, 15], all_sprites)
 Button(menu, [0, 0], [40, 40], '->', [15, 20])
 # игру
 Button(all_sprites, [0, 0], [40, 40], '->', [15, 20], menu)
 
 # активное окно
 active_sprites = menu
-
+gravity_entities = []
+drag = pai.steering.kinematic.Drag(15)
 # герой, уровень
-MainHero(all_sprites, platform_sprites, (200, 100))
+
+main_hero = MainHero(all_sprites, platform_sprites, (200, 100))
+
+npc = NPC(all_sprites, (500, 100))
+enemy = Enemy(pos = (WIGHT//6, HEIGHT//2))
+gravity_entities.append(enemy)
+enemy.ai = pai.steering.kinematic.Seek(enemy, main_hero)
+tick = clock.tick(60)/1000
 generate_level(load_level('map.txt'))
+npc_visited = False
 
 # запуск симуляции
 if __name__ == '__main__':
@@ -124,8 +138,34 @@ if __name__ == '__main__':
             screen.blit(BackGround.image, BackGround.rect)
         else:
             pass
+        if sprite_distance(npc.rect, main_hero.rect) and not npc_visited:
+            print('amogus')
+            starttime = pygame.time.get_ticks()
+            timer_npc[0] = False
+            npc_visited = True
+            my_font = pygame.font.SysFont('Comic Sans MS', 30)
+            text_surface = my_font.render('Ты встретил деда!', True, (0, 0, 0))
+            amogus = 1
+
+        try:
+            print(pygame.time.get_ticks() - starttime)
+            if pygame.time.get_ticks() - starttime >= 5000:
+                amogus = 0
+                timer_npc[0] = True
+        except:
+            pass
+        try:
+            if amogus == 1:
+                screen.blit(text_surface, (430, 50))
+        except:
+            pass
 
         active_sprites.update()
+        enemy.update(tick)
+        for gentity in gravity_entities:
+            if gentity.rect.bottom > HEIGHT:
+                gentity.rect.bottom = HEIGHT
+        enemy.steer(drag.get_steering(enemy), tick)
         active_sprites.draw(screen)
         pygame.display.flip()
 

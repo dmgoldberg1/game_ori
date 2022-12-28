@@ -2,6 +2,7 @@ import os
 import sys
 import pygame
 
+
 # создание фона
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_file, location):
@@ -9,6 +10,7 @@ class Background(pygame.sprite.Sprite):
         self.image = load_image(image_file)
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = location
+
 
 # загрузка изображений
 def load_image(name, colorkey=None):
@@ -27,3 +29,12 @@ def load_image(name, colorkey=None):
     else:
         image = image.convert_alpha()
     return image
+
+
+def sprite_distance(rect1, rect2):
+    x1, y1 = rect1.topleft
+    x2, y2 = rect2.topleft
+    if abs(x1 - x2) < 130 and abs(y1 - y2) < 130:
+        return True
+    else:
+        return False

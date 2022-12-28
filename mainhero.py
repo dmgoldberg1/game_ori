@@ -2,8 +2,8 @@ import os
 import sys
 import time
 import pygame
+from data import timer_npc
 from utilities import load_image
-
 # настройки окна
 size = WIGHT, HEIGHT = 1000, 600
 FPS = 20
@@ -21,7 +21,7 @@ platform_sprites = pygame.sprite.Group()
 # класс героя
 class MainHero(pygame.sprite.Sprite):
     # картинка
-    image = load_image("cat_hero.png", colorkey=(255, 255, 255))
+    image = load_image("temp.png", colorkey=(255, 255, 255))
     print(image.get_rect())
     image = pygame.transform.scale(image, (151 // 2, 186 // 2))
 
@@ -38,6 +38,7 @@ class MainHero(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = coords[0]
         self.rect.y = coords[1]
+        self.position = coords
 
         self.x_vel = 0
         self.y_vel = 0
@@ -46,6 +47,7 @@ class MainHero(pygame.sprite.Sprite):
 
     def update(self, *args):
         # up, down кнопки
+        from main import timer_npc
         ud_buttons = [119, 1073741906]
         # left, right кнопки
         lr_buttons = {97: -8,
@@ -74,9 +76,11 @@ class MainHero(pygame.sprite.Sprite):
         if not self.collision:
             self.state['на земле'] = False
 
+
+
         # обработка событий
         if args:
-            if args[0].type == pygame.KEYDOWN:
+            if args[0].type == pygame.KEYDOWN and timer_npc[0]:
                 self.continue_moving_x = True
 
                 if self.state['на земле']:
