@@ -1,9 +1,9 @@
- pygame
+# pygame
 import pygame
 
 # классы-работники
-from Platform import Platform
-from mainhero import MainHero
+from platform import Platform
+from new import MainHero
 from utilities import Background
 
 
@@ -113,7 +113,7 @@ def generate_level(level):
 ########################################################################################################################
 # настройки окна
 pygame.init()
-size = WIGHT, HEIGHT = 1000, 600
+size = WIDHT, HEIGHT = 1000, 600
 FPS = 30
 screen = pygame.display.set_mode(size)
 running = True
@@ -134,8 +134,8 @@ settings = pygame.sprite.Group()
 Button(settings, [0, 0], [40, 40], '->', menu)
 InputBox(settings, 100, 100, 40, 40)
 # меню
-Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Играть', all_sprites)
-Button(menu, [WIGHT // 2 - 200, 250], [350, 70], 'Настройки', settings)
+Button(menu, [WIDHT // 2 - 200, 150], [350, 70], 'Играть', all_sprites)
+Button(menu, [WIDHT // 2 - 200, 250], [350, 70], 'Настройки', settings)
 Button(menu, [0, 0], [40, 40], '->')
 # игру
 Button(all_sprites, [0, 0], [40, 40], '->', menu)

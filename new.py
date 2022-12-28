@@ -35,6 +35,7 @@ class MainHero(pygame.sprite.Sprite):
         self.image = MainHero.image
 
         # константы
+        self.collision = False
         self.continue_moving_x = False
 
         # расположение на экране
@@ -146,7 +147,7 @@ class MainHero(pygame.sprite.Sprite):
                 # обработка пересечения с левом персонажа
                 elif collide_left:
                     print('l')
-                    self.rect = pygame.Rect(collide_up[-1][0] - self.rect[2] // 2, self.rect.y,
+                    self.rect = pygame.Rect(collide[-1][0] - self.rect[2] // 2, self.rect.y,
                                             self.rect[2], self.rect[3])
                 # обработка пересечения с правом персонажа
                 elif collide_right:

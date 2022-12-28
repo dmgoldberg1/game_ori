@@ -45,6 +45,33 @@ class Platform(pygame.sprite.Sprite):
     def update(self, *args):
         pass
 
+class PlatformMoving(Platform):
+    # картинка
+    image = load_image("platform_fire.png", colorkey=(0, 0, 0))
+    image = pygame.transform.scale(image, (150, 100))
+
+    def __init__(self, group, special_group, coords, image=image, image_scale=None):
+        super().__init__(group)
+        self.image = image
+        if image_scale:
+            self.image = pygame.transform.scale(self.image, image_scale)
+        self.rect = self.image.get_rect()
+        print(self.image.get_rect())
+        self.rect.x = coords[0] * 100 - 50
+        self.rect.y = coords[1] * 100 - 50
+
+        # self.x_vel = 0
+        # self.y_vel = 0
+
+        # создаем маску платформы для пересечения
+        self.mask = pygame.mask.from_surface(self.image)
+
+        # добавляем в группу спрайтов-платформ
+        self.add(special_group)
+
+    def update(self, *args):
+        pass
+
 
 # добавление платформы в спрайты
 Platform(all_sprites, platform_sprites, (0, 0))
