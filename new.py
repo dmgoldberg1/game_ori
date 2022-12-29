@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-
+from data import timer_npc
 import pygame
 from utilities import load_image
 
@@ -65,7 +65,7 @@ class MainHero(pygame.sprite.Sprite):
     def update(self, *args):
         # обработка событий
         if args:
-            if args[0].type == pygame.KEYDOWN and timer_nps[0]:
+            if args[0].type == pygame.KEYDOWN and timer_npc[0]:
                 self.continue_moving_x = True
 
                 if self.state['на земле']:
@@ -93,7 +93,7 @@ class MainHero(pygame.sprite.Sprite):
                     self.x_vel = 0
 
         # обработка пересечений
-        print(self.state['на земле'])
+        # print(self.state['на земле'])
         self.rect = self.rect.move(self.x_vel, self.y_vel)
         self.position = pygame.Rect(self.rect)
 
