@@ -1,7 +1,5 @@
-import os
-import sys
-
 import pygame
+
 from utilities import load_image
 
 # настройки окна
@@ -62,12 +60,6 @@ class PlatformFire(Platform):
 
         self.platform_type = 'fire'
 
-        # создаем маску платформы для пересечения
-        self.mask = pygame.mask.from_surface(self.image)
-
-        # добавляем в группу спрайтов-платформ
-        self.add(special_group)
-
     def update(self, *args):
         pass
 
@@ -85,17 +77,29 @@ class PlatformMove(Platform):
 
         self.platform_type = 'move'
 
-        # создаем маску платформы для пересечения
-        self.mask = pygame.mask.from_surface(self.image)
+    def update(self, *args):
+        pass
 
-        # добавляем в группу спрайтов-платформ
-        self.add(special_group)
+
+class PlatformSlippery(Platform):
+    # картинка
+    image = load_image("platform_test.png", colorkey=(0, 0, 0))
+    image = pygame.transform.scale(image, (150, 100))
+
+    def __init__(self, group, special_group, coords, image=image, image_scale=None):
+        super().__init__(group, special_group, coords)
+        self.image = image
+        if image_scale:
+            self.image = pygame.transform.scale(self.image, image_scale)
+
+        self.platform_type = 'slippery'
 
     def update(self, *args):
         pass
 
+
 # добавление платформы в спрайты
-a = PlatformFire(all_sprites, platform_sprites, (2, 2))
+a = PlatformSlippery(all_sprites, platform_sprites, (2, 2))
 print(a.rect)
 if __name__ == '__main__':
     while running:
@@ -106,7 +110,6 @@ if __name__ == '__main__':
 
             # отрисовка спрайта
             all_sprites.update(event)
-
         # зарисовка и загрузочный апдейт
         screen.fill((255, 255, 255))
         all_sprites.update()

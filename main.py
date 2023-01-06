@@ -2,10 +2,10 @@
 import pygame
 import time
 # классы-работники
-from platform import Platform
+from platform import Platform, PlatformSlippery, PlatformFire, PlatformMove
 from new import MainHero
 from utilities import Background, sprite_distance
-from npc import NPC #Enemy, PathCosine
+from npc import NPC, Enemy
 from data import timer_npc
 # import pygame_ai as pai
 from camera import Camera
@@ -72,6 +72,8 @@ def generate_level(level):
                 continue
             elif level[y][x] == '-':
                 Platform(all_sprites, platform_sprites, (x, y))
+            elif level[y][x] == '(':
+                PlatformSlippery(all_sprites, platform_sprites, (x, y))
 
 
 ########################################################################################################################
@@ -112,6 +114,7 @@ active_sprites = menu
 # герой, уровень
 
 main_hero = MainHero(all_sprites, platform_sprites, (200, 100))
+enemy = Enemy(all_sprites, (400, 100))
 
 npc = NPC(all_sprites, (500, 100))
 # enemy = Enemy(pos = (WIGHT//6, HEIGHT//2))

@@ -33,9 +33,13 @@ class MainHero(pygame.sprite.Sprite):
         self.image = MainHero.image
 
         # константы
-        self.collision = False
         self.continue_moving_x = False
         self.in_air = True
+        self.button_lr_pressed = False
+
+        # игровые моменты
+        self.platform_type = None
+        self.hp = 10
 
         # расположение на экране
         self.rect = self.image.get_rect()
@@ -74,11 +78,20 @@ class MainHero(pygame.sprite.Sprite):
 
                 if args[0].key in self.lr_buttons:
                     self.x_vel = self.lr_buttons[args[0].key]
+                    self.button_lr_pressed = True
 
             if args[0].type == pygame.KEYUP and args[0].key in self.lr_buttons:
                 self.continue_moving_x = False
+                self.button_lr_pressed = False
 
-        # обработка статуса положения
+        # обработка платформы
+        if self.platform_type == 'slippery':
+            self.continue_moving_x = True
+        else:
+            if not self.button_lr_pressed:
+                self.continue_moving_x = False
+
+                # обработка статуса положения
         if not self.state['на земле']:
             self.y_vel += 2
         else:
@@ -98,6 +111,7 @@ class MainHero(pygame.sprite.Sprite):
         for i in self.platform_sprite_group:
             # print(i.mask.get_bounding_rects()[0])
             a, b, c, d = i.mask.get_bounding_rects()[0][:4]
+            platform = i
             platform_rect = pygame.Rect(i.rect[0] + a, i.rect[1] + b + 5, c, d)
 
             # линия пересечения персонажа по 4 направлениям
@@ -119,6 +133,7 @@ class MainHero(pygame.sprite.Sprite):
             # print(collide, line11, platform_rect)
             if any([collide_down_right, collide_down_left, collide_top_right, collide_top_left]):
                 self.in_air = False
+
 
                 # обработка пересечения с низом - правом персонажа
                 if collide_down_right:
@@ -197,6 +212,7 @@ class MainHero(pygame.sprite.Sprite):
                 if (platform_rect.collidepoint(self.position.left, self.position.bottom)) or \
                         (platform_rect.collidepoint(self.position.right, self.position.bottom)):
                     self.state['на земле'] = True
+                    self.platform_type = platform.platform_type
                 else:
                     self.state['на земле'] = False
 
