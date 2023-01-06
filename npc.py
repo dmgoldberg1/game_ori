@@ -4,8 +4,8 @@ import time
 import pygame
 from utilities import load_image, sprite_distance
 from pygame.locals import *
-import pygame_ai as pai
 import math
+import random
 
 all_sprites = pygame.sprite.Group()
 
@@ -21,75 +21,33 @@ class NPC(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=coords)
 
 
-class Enemy(pai.gameobject.GameObject):
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, group, coords):
+        super().__init__(group)
+        self.image = load_image('temp.png')
+        self.rect = self.image.get_rect(topleft=coords)
+        self.pos = pygame.math.Vector2(0, 0)
+        self.vel = pygame.math.Vector2(0, 0)
+        self.direction = random.randint(0, 1)  # 0 for Right, 1 for Left
+        self.vel.x = random.randint(2, 6) / 2  # Randomized velocity of the generated enemy
+        if self.direction == 0:
+            self.pos.x = 0
+            self.pos.y = 235
+        if self.direction == 1:
+            self.pos.x = 700
+            self.pos.y = 235
 
-    def __init__(self, pos=(0, 0)):
+    def update(self, *args):
+        # Causes the enemy to change directions upon reaching the end of screen
+        if self.pos.x >= 300:
+            self.direction = 1
+        elif self.pos.x <= 0:
+            self.direction = 0
+            self.pos.x += self.vel.x
 
-        img = pygame.Surface((10, 10)).convert_alpha()
-        img.fill((255, 255, 255, 0))
+        if self.direction == 0:
+            self.pos.x += self.vel.x
+        if self.direction == 1:
+            self.pos.x -= self.vel.x
 
-        pygame.draw.circle(img, (255, 0, 0), (5, 5), 5)
-
-        super(Enemy, self).__init__(
-            img_surf=img,
-            pos=pos,
-            max_speed=10,
-            max_accel=40,
-            max_rotation=40,
-            max_angular_accel=30
-        )
-
-        self.ai = pai.steering.kinematic.NullSteering()
-
-    def update(self, tick):
-        gravity = pai.steering.kinematic.SteeringOutput()
-        gravity.linear[1] = 300
-
-
-        steering = self.ai.get_steering()
-        self.steer_x(steering, tick)
-
-        velocity = self.velocity + gravity.linear * tick
-
-        self.rect.move_ip(velocity)
-
-
-class Enemy_test(pai.gameobject.GameObject):
-
-    def __init__(self, pos=(0, 0)):
-        img = pygame.Surface((10, 10)).convert_alpha()
-        img.fill((255, 255, 255, 0))
-        pygame.draw.circle(img, (255, 0, 0), (5, 5), 5)
-        super(Enemy_test, self).__init__(
-            img_surf=img,
-            pos=pos,
-            max_speed=25,
-            max_accel=40,
-            max_rotation=40,
-            max_angular_accel=30
-        )
-        self.ai = pai.steering.kinematic.NullSteering()
-
-    def update(self, tick):
-        steering = self.ai.get_steering()
-        self.steer(steering, tick)
-        self.rect.move_ip(self.velocity)
-
-
-class PathCosine(pai.steering.path.Path):
-
-    def __init__(self, start, height, length):
-        self.start = start
-        self.height = height
-        self.length = length
-
-        def cosine_path(self, x):
-            y = self.start[1] + math.cos(x) * self.height
-            return x, y
-
-        super(PathCosine, self).__init__(
-            path_func=cosine_path,
-            domain_start=int(self.start[0]),
-            domain_end=int(self.start[0] + length),
-            increment=30
-        )
+        self.rect.center = self.pos  # Updates rect
