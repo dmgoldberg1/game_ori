@@ -20,7 +20,7 @@ class NPC(pygame.sprite.Sprite):
         self.group = group
         self.rect = self.image.get_rect(topleft=coords)
 
-
+#npc
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, group, coords):
         super().__init__(group)
