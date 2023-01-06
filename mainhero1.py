@@ -190,3 +190,40 @@ if __name__ == '__main__':
         pygame.display.flip()
 
     pygame.quit()
+
+# if collide_top_left:
+#     print('t_l')
+#     if not platform_rect.collidepoint(self.last_position.right, self.last_position.top):
+#         print(collide_top_left)
+#         self.y_vel = 0
+#         x = min(collide_top_left[0][0], collide_top_left[-1][0])
+#         y = max(collide_top_left[0][1], collide_top_left[-1][1])
+#         self.rect = self.rect.move(x - self.rect.x,
+#                                    (y - self.rect.y + 1))
+
+# # обработка пересечения с левом персонажа
+# if collide_left_down:
+#     print('l_d')
+#     if not platform_rect.collidepoint(self.last_position.left, self.last_position.bottom):
+#         print(collide_left_down)
+#         self.x_vel = 0
+#         # self.rect = self.rect.move((collide_left_down[0][0] - self.rect.width) - self.rect.x,
+#         #                            (collide_left_down[0][1] - self.rect.y + 1))
+#
+# elif collide_left_top:
+#     print('l_t')
+#     if not platform_rect.collidepoint(self.last_position.left, self.last_position.top):
+#         print(collide_left_top)
+#         self.x_vel = 0
+#         # self.rect = self.rect.move((collide_left_top[0][0]) - self.rect.x,
+#         #                            (collide_left_top[0][1] - self.rect.y + 1))
+
+# elif collide_left:
+#     print('l')
+#     # self.rect = pygame.Rect(collide[-1][0] - self.rect[2] // 2, self.rect.y,
+#     #                         self.rect[2], self.rect[3])
+# # обработка пересечения с правом персонажа
+# elif collide_right:
+#     print('r')
+#     # self.rect = pygame.Rect(collide[-1][0] - self.rect[2] // 2, self.rect.y,
+#     #                         self.rect[2], self.rect[3])

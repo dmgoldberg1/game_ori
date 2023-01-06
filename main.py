@@ -143,7 +143,7 @@ if __name__ == '__main__':
         else:
             pass
         if sprite_distance(npc.rect, main_hero.rect) and not npc_visited:
-            print('amogus')
+            # print('amogus')
             starttime = pygame.time.get_ticks()
             timer_npc[0] = False
             npc_visited = True
@@ -152,7 +152,7 @@ if __name__ == '__main__':
             amogus = 1
 
         try:
-            print(pygame.time.get_ticks() - starttime)
+            # print(pygame.time.get_ticks() - starttime)
             if pygame.time.get_ticks() - starttime >= 5000:
                 amogus = 0
                 timer_npc[0] = True
