@@ -1,5 +1,7 @@
 # pygame
 import pygame
+# БД
+import sqlite3
 import time
 # классы-работники
 from platform import Platform, PlatformSlippery, PlatformFire, PlatformMove
@@ -13,7 +15,7 @@ from camera import Camera
 
 # кнопка
 class Button(pygame.sprite.Sprite):
-    def __init__(self, group, coords, size, description, offset, linked_page=False):
+    def __init__(self, group, coords, size, description, linked_page=False):
         super().__init__(group)
 
         # цвет всех кнопок (можно менять)
@@ -23,7 +25,7 @@ class Button(pygame.sprite.Sprite):
         # текст (можно менять настройки)
         f1 = pygame.font.SysFont('arial', 36)
         text1 = f1.render(description, True, (255, 0, 0))
-        self.image.blit(text1, (size[0] // 2 - offset[0], size[1] // 2 - offset[1]))
+        self.image.blit(text1, ((size[0] - text1.get_width()) // 2, (size[1] - text1.get_height()) // 2))
 
         # координаты
         self.rect = self.image.get_rect()
@@ -34,6 +36,8 @@ class Button(pygame.sprite.Sprite):
         self.linked_page = linked_page
 
     def update(self, *args):
+        global active_sprites
+        global running
         # реакция на клик
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
@@ -46,10 +50,55 @@ class Button(pygame.sprite.Sprite):
                 global running
                 running = False
 
+        elif args and args[0].type == pygame.KEYDOWN:
+            if args[0].key == 27:
+                if self.linked_page:
+                    active_sprites = self.linked_page
+                else:
+                    running = False
+
 
 # вставил кноки в main, потому что привязка к running и active_sprites
 # неудобна через импорт, простите
 
+
+# ПОКА НЕ СВЯЗАНО С БД
+class KeyRegister(pygame.sprite.Sprite):
+    def __init__(self, group, coords, db_link):
+        super().__init__(group)
+        self.size = [50, 50]
+        self.db_link = db_link
+
+        self.image = pygame.Surface(self.size)
+        self.active = False
+        self.draw((0, 255, 0))
+
+        # координаты
+        self.rect = self.image.get_rect()
+        self.rect.x = coords[0]
+        self.rect.y = coords[1]
+
+    def update(self, *args):
+        # реакция на клик
+        clicked = args and self.rect.collidepoint(pygame.mouse.get_pos())
+        if clicked and args[0].type == pygame.MOUSEBUTTONDOWN:
+            self.active = True
+            self.draw((0, 123, 0))
+            print(self.rect)
+
+        elif clicked and args[0].type == pygame.KEYDOWN and self.active:
+            self.active = False
+            self.db_link = args[0].unicode
+
+            self.draw((0, 255, 0))
+    
+    # отрисовка линии
+    def draw(self, color):
+        self.image.fill((255, 255, 255))
+        pygame.draw.rect(self.image, color, [0, 0, 50, 50], 5)
+        f1 = pygame.font.SysFont('arial', 36)
+        text1 = f1.render(self.db_link, True, (255, 0, 0))
+        self.image.blit(text1, ((self.size[0] - text1.get_width()) // 2, (self.size[1] - text1.get_height()) // 2))
 
 def load_level(filename):
     filename = "data/" + filename
@@ -76,6 +125,7 @@ def generate_level(level):
                 PlatformSlippery(all_sprites, platform_sprites, (x, y))
 
 
+count = True
 ########################################################################################################################
 # настройки окна
 pygame.init()
@@ -98,14 +148,18 @@ settings = pygame.sprite.Group()
 
 # загружаем кнопками:
 # настройки
-Button(settings, [0, 0], [40, 40], '->', [15, 20], menu)
+Button(settings, [0, 0], [40, 40], '←', menu)
+KeyRegister(settings, [WIGHT // 2 - 200, 150], 'w')
+KeyRegister(settings, [WIGHT // 2 - 200, 210], 'a')
+KeyRegister(settings, [WIGHT // 2 - 200, 270], 's')
+KeyRegister(settings, [WIGHT // 2 - 200, 330], 'd')
 # меню
-Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Играть', [45, 15], all_sprites)
-Button(menu, [WIGHT // 2 - 200, 250], [350, 70], 'Настройки', [70, 15], settings)
-Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Обучение', [25, 15], all_sprites)
-Button(menu, [0, 0], [40, 40], '->', [15, 20])
+Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Играть', all_sprites)
+Button(menu, [WIGHT // 2 - 200, 250], [350, 70], 'Настройки', settings)
+Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Обучение', all_sprites)
+Button(menu, [0, 0], [40, 40], '←')
 # игру
-Button(all_sprites, [0, 0], [40, 40], '->', [15, 20], menu)
+Button(all_sprites, [0, 0], [40, 40], '←', menu)
 
 # активное окно
 active_sprites = menu
