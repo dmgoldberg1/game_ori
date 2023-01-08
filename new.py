@@ -60,14 +60,34 @@ class MainHero(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
         # up, down кнопки
-        self.ud_buttons = [119, 1073741906]
+        self.ud_buttons = [self.get_from_db('Прыжок'), 1073741906]
         # left, right кнопки
-        self.lr_buttons = {97: -8,
-                           100: 8,
+        self.lr_buttons = {self.get_from_db('Влево'): -8,
+                           self.get_from_db('Вправо'): 8,
                            1073741904: -8,
                            1073741903: 8}
 
+    def get_from_db(self, db_link):
+        con = sqlite3.connect(os.path.join('data', 'storage.db'))
+        cur = con.cursor()
+        result = cur.execute("""SELECT nums FROM binds WHERE name = ?""", (db_link,)).fetchall()
+        con.close()
+        return result[0][0]
+
     def update(self, *args):
+        # обновление биндов во время работы игры
+        if not self.lr_buttons != {self.get_from_db('Влево'): -8,
+                                   self.get_from_db('Вправо'): 8,
+                                   1073741904: -8,
+                                   1073741903: 8}:
+            self.lr_buttons = {self.get_from_db('Влево'): -8,
+                               self.get_from_db('Вправо'): 8,
+                               1073741904: -8,
+                               1073741903: 8}
+
+        if self.ud_buttons != [self.get_from_db('Прыжок'), 1073741906]:
+            self.ud_buttons = [self.get_from_db('Прыжок'), 1073741906]
+            
         # обработка событий
         if args:
             if args[0].type == pygame.KEYDOWN and timer_npc[0]:
