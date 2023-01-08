@@ -2,6 +2,7 @@
 import pygame
 # БД
 import sqlite3
+import os
 import time
 
 # import pygame_ai as pai
@@ -22,6 +23,7 @@ from camera import Camera
 
 # рабочие классы/функции
 ########################################################################################################################
+
 # кнопка
 class Button(pygame.sprite.Sprite):
     def __init__(self, group, coords, size, description, linked_page=False):
@@ -45,6 +47,8 @@ class Button(pygame.sprite.Sprite):
         self.linked_page = linked_page
 
     def update(self, *args):
+        global active_sprites
+        global running
         # реакция на клик
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
@@ -65,16 +69,16 @@ class Button(pygame.sprite.Sprite):
                     running = False
 
 
-# вставил кноки в main, потому что привязка к running и active_sprites
-# неудобна через импорт, простите
-
-
-# ПОКА НЕ СВЯЗАНО С БД
+# ввод биндов
 class KeyRegister(pygame.sprite.Sprite):
     def __init__(self, group, coords, db_link):
         super().__init__(group)
         self.size = [50, 50]
         self.db_link = db_link
+
+        self.nums = 0
+        self.key = 0
+        self.pick_from_db()
 
         self.image = pygame.Surface(self.size)
         self.active = False
@@ -91,23 +95,42 @@ class KeyRegister(pygame.sprite.Sprite):
         if clicked and args[0].type == pygame.MOUSEBUTTONDOWN:
             self.active = True
             self.draw((0, 123, 0))
-            print(self.rect)
 
         elif clicked and args[0].type == pygame.KEYDOWN and self.active:
-            self.active = False
-            self.db_link = args[0].unicode
+            self.nums = args[0].key
+            self.key = args[0].unicode
 
+            con = sqlite3.connect(os.path.join('data', 'storage.db'))
+            cur = con.cursor()
+
+            result = cur.execute("""UPDATE binds SET key = ? WHERE name = ?""",
+                                 (self.key, self.db_link)).fetchall()
+            result = cur.execute("""UPDATE binds SET nums = ? WHERE name = ?""",
+                                 (self.nums, self.db_link)).fetchall()
+
+            con.commit()
+            con.close()
+
+            self.active = False
             self.draw((0, 255, 0))
+
+    def pick_from_db(self):
+        con = sqlite3.connect(os.path.join('data', 'storage.db'))
+        cur = con.cursor()
+        result = cur.execute("""SELECT nums, key FROM binds WHERE name = ?""", (self.db_link,)).fetchall()
+        self.nums, self.key = result[0]
+        con.close()
 
     # отрисовка линии
     def draw(self, color):
         self.image.fill((255, 255, 255))
         pygame.draw.rect(self.image, color, [0, 0, 50, 50], 5)
         f1 = pygame.font.SysFont('arial', 36)
-        text1 = f1.render(self.db_link, True, (255, 0, 0))
+        text1 = f1.render(self.key, True, (255, 0, 0))
         self.image.blit(text1, ((self.size[0] - text1.get_width()) // 2, (self.size[1] - text1.get_height()) // 2))
 
 
+# лейблы
 class Label(pygame.sprite.Sprite):
     def __init__(self, group, coords, font, description, font_size=36):
         super().__init__(group)
@@ -130,6 +153,7 @@ class Label(pygame.sprite.Sprite):
         pass
 
 
+# загрузка уровней
 def load_level(filename):
     filename = "data/" + filename
     # читаем уровень, убирая символы перевода строки
@@ -143,6 +167,7 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
+# прорисовка уровней
 def generate_level(level):
     x, y = None, None
     for y in range(len(level)):
@@ -156,6 +181,7 @@ def generate_level(level):
 
 # расстановка спрайтов
 ########################################################################################################################
+
 # настройки окна
 pygame.init()
 size = WIDTH, HEIGHT = 1000, 600
