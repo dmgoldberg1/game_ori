@@ -39,6 +39,7 @@ class MainHero(pygame.sprite.Sprite):
 
         # игровые моменты
         self.platform_type = None
+        self.platform = None
         self.hp = 10
 
         # расположение на экране
@@ -51,6 +52,7 @@ class MainHero(pygame.sprite.Sprite):
         self.hero_height = self.image.get_rect()[3]
 
         self.last_position = pygame.Rect(self.rect)
+        self.position = pygame.Rect(self.rect)
 
         self.x_vel = 0
         self.y_vel = 0
@@ -212,6 +214,7 @@ class MainHero(pygame.sprite.Sprite):
                             (platform_rect.collidepoint(self.position.right, self.position.bottom)):
                         self.state['на земле'] = True
                         self.platform_type = platform.platform_type
+                        self.platform = platform
                     else:
                         self.state['на земле'] = False
 
@@ -222,7 +225,7 @@ class MainHero(pygame.sprite.Sprite):
             # упал - умер - возродился
             if self.rect.y > HEIGHT:  # HEIGHT - берется из файла mainhero.py
                 self.kill()
-                MainHero(self.group, self.platform_sprite_group, (600, 250))
+                MainHero(self.group, self.platform_sprite_group, (self.platform.rect.x, self.platform.rect.y - self.rect.height))
 
             # запоминаем старую позицию
             self.last_position = self.position

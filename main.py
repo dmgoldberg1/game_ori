@@ -1,19 +1,19 @@
 # pygame
 import pygame
-import time
-# классы-работники
-from platform import Platform, PlatformSlippery, PlatformFire, PlatformMove
-from new import MainHero
-from utilities import Background, sprite_distance
-from npc import NPC, Enemy
-from data import timer_npc
+
 # import pygame_ai as pai
 from camera import Camera
+from data import timer_npc
+from new import MainHero
+from npc import NPC, EnemyMelee, EnemyRangeFly
+from platform import PlatformSlippery, Platform
+# классы-работники
+from utilities import Background, sprite_distance
 
 
 # кнопка
 class Button(pygame.sprite.Sprite):
-    def __init__(self, group, coords, size, description, offset, linked_page=False):
+    def __init__(self, group, coords, size, description, linked_page=False):
         super().__init__(group)
 
         # цвет всех кнопок (можно менять)
@@ -23,7 +23,7 @@ class Button(pygame.sprite.Sprite):
         # текст (можно менять настройки)
         f1 = pygame.font.SysFont('arial', 36)
         text1 = f1.render(description, True, (255, 0, 0))
-        self.image.blit(text1, (size[0] // 2 - offset[0], size[1] // 2 - offset[1]))
+        self.image.blit(text1, ((size[0] - text1.get_width()) // 2, (size[1] - text1.get_height()) // 2))
 
         # координаты
         self.rect = self.image.get_rect()
@@ -34,6 +34,8 @@ class Button(pygame.sprite.Sprite):
         self.linked_page = linked_page
 
     def update(self, *args):
+        global active_sprites
+        global running
         # реакция на клик
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
@@ -46,9 +48,54 @@ class Button(pygame.sprite.Sprite):
                 global running
                 running = False
 
+        elif args and args[0].type == pygame.KEYDOWN:
+            if args[0].key == 27:
+                if self.linked_page:
+                    active_sprites = self.linked_page
+                else:
+                    running = False
+
+
+# ПОКА НЕ СВЯЗАНО С БД
+class KeyRegister(pygame.sprite.Sprite):
+    def __init__(self, group, coords, db_link):
+        super().__init__(group)
+        self.size = [50, 50]
+        self.db_link = db_link
+
+        self.image = pygame.Surface(self.size)
+        self.active = False
+        self.draw((0, 255, 0))
+
+        # координаты
+        self.rect = self.image.get_rect()
+        self.rect.x = coords[0]
+        self.rect.y = coords[1]
+
+    def update(self, *args):
+        # реакция на клик
+        clicked = args and self.rect.collidepoint(pygame.mouse.get_pos())
+        if clicked and args[0].type == pygame.MOUSEBUTTONDOWN:
+            self.active = True
+            self.draw((0, 123, 0))
+            print(self.rect)
+
+        elif clicked and args[0].type == pygame.KEYDOWN and self.active:
+            self.active = False
+            self.db_link = args[0].unicode
+
+            self.draw((0, 255, 0))
+
+    # отрисовка линии
+    def draw(self, color):
+        self.image.fill((255, 255, 255))
+        pygame.draw.rect(self.image, color, [0, 0, 50, 50], 5)
+        f1 = pygame.font.SysFont('arial', 36)
+        text1 = f1.render(self.db_link, True, (255, 0, 0))
+        self.image.blit(text1, ((self.size[0] - text1.get_width()) // 2, (self.size[1] - text1.get_height()) // 2))
+
 
 # вставил кноки в main, потому что привязка к running и active_sprites
-# неудобна через импорт, простите
 
 
 def load_level(filename):
@@ -88,24 +135,28 @@ clock = pygame.time.Clock()
 BackGround = Background('forest.jpg', [0, 0])
 
 # заготовки групп спрайтов
-# игра
 all_sprites = pygame.sprite.Group()
 platform_sprites = pygame.sprite.Group()
 main_hero_sprite = pygame.sprite.Group()
+
 # меню
 menu = pygame.sprite.Group()
 settings = pygame.sprite.Group()
 
-# загружаем кнопками:
 # настройки
-Button(settings, [0, 0], [40, 40], '->', [15, 20], menu)
+Button(settings, [0, 0], [40, 40], '->', menu)
+KeyRegister(settings, [WIGHT // 2 - 200, 150], 'w')
+KeyRegister(settings, [WIGHT // 2 - 200, 210], 'a')
+KeyRegister(settings, [WIGHT // 2 - 200, 270], 's')
+KeyRegister(settings, [WIGHT // 2 - 200, 330], 'd')
+
 # меню
-Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Играть', [45, 15], all_sprites)
-Button(menu, [WIGHT // 2 - 200, 250], [350, 70], 'Настройки', [70, 15], settings)
-Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Обучение', [25, 15], all_sprites)
-Button(menu, [0, 0], [40, 40], '->', [15, 20])
+Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Играть', all_sprites)
+Button(menu, [WIGHT // 2 - 200, 250], [350, 70], 'Настройки', settings)
+Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Обучение', all_sprites)
+Button(menu, [0, 0], [40, 40], '->')
 # игру
-Button(all_sprites, [0, 0], [40, 40], '->', [15, 20], menu)
+button_in_game = Button(all_sprites, [0, 0], [40, 40], '->', menu)
 
 # активное окно
 active_sprites = menu
@@ -114,30 +165,31 @@ active_sprites = menu
 # герой, уровень
 
 main_hero = MainHero(all_sprites, platform_sprites, (200, 100))
-enemy = Enemy(all_sprites, (400, 100))
+enemy_melee = EnemyMelee(all_sprites, platform_sprites, (200, 100))
+enemy_range_fly = EnemyRangeFly(all_sprites, platform_sprites, (200, 100))
 
-npc = NPC(all_sprites, (500, 100))
-# enemy = Enemy(pos = (WIGHT//6, HEIGHT//2))
-# gravity_entities.append(enemy)
-# enemy.ai = pai.steering.kinematic.Seek(enemy, main_hero)
-tick = clock.tick(60)/1000
+npc = NPC(all_sprites, (500, 100), 'Ты встретил деда!')
+tick = clock.tick(60) / 1000
 generate_level(load_level('map.txt'))
-npc_visited = False
 
 # камера
-camera = Camera()
+camera = Camera(WIGHT, HEIGHT, main_hero)
 
 # запуск симуляции
 if __name__ == '__main__':
     while running:
+        # запускаем время
         clock.tick(FPS)
+
+        # обработка событий - отклик
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-            # отрисовка спрайтов
+            # обновление спрайтов
             active_sprites.update(event)
-        # зарисовка и загрузочный апдейт
+
+        # начало отрисовки нового экрана
         screen.fill((255, 255, 255))
 
         # фон (на else можно поменять фон меню)
@@ -145,38 +197,45 @@ if __name__ == '__main__':
             screen.blit(BackGround.image, BackGround.rect)
         else:
             pass
-        if sprite_distance(npc.rect, main_hero.rect) and not npc_visited:
+
+        if sprite_distance(npc.rect, main_hero.rect) and not npc.npc_visited:
             # print('amogus')
             starttime = pygame.time.get_ticks()
             timer_npc[0] = False
-            npc_visited = True
-            my_font = pygame.font.SysFont('Comic Sans MS', 30)
-            text_surface = my_font.render('Ты встретил деда!', True, (0, 0, 0))
+
+            npc.npc_visited = True
+            npc.npc_visit = True
+            npc.npc_time_visit = pygame.time.get_ticks()
             amogus = 1
 
-        try:
-            # print(pygame.time.get_ticks() - starttime)
-            if pygame.time.get_ticks() - starttime >= 5000:
-                amogus = 0
+        # если время встречи пошло
+        if npc.npc_time_visit:
+
+            # если время посещения превосходит 5 сек
+            if pygame.time.get_ticks() - npc.npc_time_visit >= 5000:
+                npc.npc_visit = False
+                npc.npc_time_visit = 0
                 timer_npc[0] = True
-        except:
-            pass
-        try:
-            if amogus == 1:
-                screen.blit(text_surface, (430, 50))
-        except:
-            pass
+
+            # если персонаж сейчас посещает нпс
+            if npc.npc_visit:
+                screen.blit(npc.text_surface, (430, 50))
 
         active_sprites.update()
-        # camera.update(main_hero)
-        # # обновляем положение всех спрайтов
-        # for sprite in all_sprites:
-        #     camera.apply(sprite)
-        # enemy.update(tick)
-        # for gentity in gravity_entities:
-        #     if gentity.rect.bottom > HEIGHT:
-        #         gentity.rect.bottom = HEIGHT
-        # enemy.steer(drag.get_steering(enemy), tick)
+
+        # если экран игры
+        if active_sprites == all_sprites:
+
+            # изменяем ракурс камеры
+            camera.update(main_hero)
+
+            # обновляем положение всех спрайтов
+            for sprite in all_sprites:
+                if sprite != button_in_game:
+                    camera.apply(sprite)
+            main_hero.last_position = main_hero.rect
+            main_hero.position = main_hero.rect
+
         active_sprites.draw(screen)
         pygame.display.flip()
 

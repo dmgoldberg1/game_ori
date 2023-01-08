@@ -28,7 +28,7 @@ class Platform(pygame.sprite.Sprite):
         if image_scale:
             self.image = pygame.transform.scale(self.image, image_scale)
         self.rect = self.image.get_rect()
-        print(self.image.get_rect())
+        # print(self.image.get_rect())
         self.rect.x = coords[0] * 100 - 50
         self.rect.y = coords[1] * 100 - 50
 
@@ -83,11 +83,11 @@ class PlatformMove(Platform):
 
 class PlatformSlippery(Platform):
     # картинка
-    image = load_image("platform_test.png", colorkey=(0, 0, 0))
-    image = pygame.transform.scale(image, (150, 100))
+    image = load_image("platform_slippery.png", colorkey=(0, 0, 0))
+    image = pygame.transform.scale(image, (150, 50))
 
     def __init__(self, group, special_group, coords, image=image, image_scale=None):
-        super().__init__(group, special_group, coords)
+        super().__init__(group, special_group, (coords[0], coords[1]))
         self.image = image
         if image_scale:
             self.image = pygame.transform.scale(self.image, image_scale)
@@ -100,7 +100,7 @@ class PlatformSlippery(Platform):
 
 # добавление платформы в спрайты
 a = PlatformSlippery(all_sprites, platform_sprites, (2, 2))
-print(a.rect)
+# print(a.rect)
 if __name__ == '__main__':
     while running:
         clock.tick(FPS)
