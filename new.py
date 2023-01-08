@@ -1,5 +1,6 @@
 import pygame
-
+import os
+import sqlite3
 from data import timer_npc
 from utilities import load_image
 
