@@ -5,7 +5,7 @@ import sqlite3
 import time
 # классы-работники
 from platform import Platform, PlatformSlippery, PlatformFire, PlatformMove
-from new import MainHero
+from mainhero import MainHero
 from utilities import Background, sprite_distance
 from npc import NPC, Enemy
 from data import timer_npc
@@ -13,6 +13,8 @@ from data import timer_npc
 from camera import Camera
 
 
+# рабочие классы/функции
+########################################################################################################################
 # кнопка
 class Button(pygame.sprite.Sprite):
     def __init__(self, group, coords, size, description, linked_page=False):
@@ -91,7 +93,7 @@ class KeyRegister(pygame.sprite.Sprite):
             self.db_link = args[0].unicode
 
             self.draw((0, 255, 0))
-    
+
     # отрисовка линии
     def draw(self, color):
         self.image.fill((255, 255, 255))
@@ -99,6 +101,29 @@ class KeyRegister(pygame.sprite.Sprite):
         f1 = pygame.font.SysFont('arial', 36)
         text1 = f1.render(self.db_link, True, (255, 0, 0))
         self.image.blit(text1, ((self.size[0] - text1.get_width()) // 2, (self.size[1] - text1.get_height()) // 2))
+
+
+class Label(pygame.sprite.Sprite):
+    def __init__(self, group, coords, font, description, font_size=36):
+        super().__init__(group)
+
+        f1 = pygame.font.SysFont(font, font_size)
+        text1 = f1.render(description, True, (255, 0, 0))
+
+        self.size = [text1.get_width(), text1.get_height()]
+        self.image = pygame.Surface(self.size)
+        self.image.fill((255, 255, 255))
+
+        self.image.blit(text1, (0, 0))
+
+        # координаты
+        self.rect = self.image.get_rect()
+        self.rect.x = coords[0]
+        self.rect.y = coords[1]
+
+    def update(self, *args):
+        pass
+
 
 def load_level(filename):
     filename = "data/" + filename
@@ -124,12 +149,11 @@ def generate_level(level):
             elif level[y][x] == '(':
                 PlatformSlippery(all_sprites, platform_sprites, (x, y))
 
-
-count = True
+# расстановка спрайтов
 ########################################################################################################################
 # настройки окна
 pygame.init()
-size = WIGHT, HEIGHT = 1000, 600
+size = WIDTH, HEIGHT = 1000, 600
 FPS = 30
 screen = pygame.display.set_mode(size)
 running = True
@@ -145,19 +169,35 @@ main_hero_sprite = pygame.sprite.Group()
 # меню
 menu = pygame.sprite.Group()
 settings = pygame.sprite.Group()
+about = pygame.sprite.Group()
 
 # загружаем кнопками:
 # настройки
 Button(settings, [0, 0], [40, 40], '←', menu)
-KeyRegister(settings, [WIGHT // 2 - 200, 150], 'w')
-KeyRegister(settings, [WIGHT // 2 - 200, 210], 'a')
-KeyRegister(settings, [WIGHT // 2 - 200, 270], 's')
-KeyRegister(settings, [WIGHT // 2 - 200, 330], 'd')
+
+Label(settings, [WIDTH // 2 - 320, 150], 'arial', 'Прыжок')
+KeyRegister(settings, [WIDTH // 2 - 200, 150], 'w')
+
+Label(settings, [WIDTH // 2 - 320, 210], 'arial', 'Влево')
+KeyRegister(settings, [WIDTH // 2 - 200, 210], 'a')
+
+Label(settings, [WIDTH // 2 - 320, 270], 'arial', 'Crouch')
+KeyRegister(settings, [WIDTH // 2 - 200, 270], 's')
+
+Label(settings, [WIDTH // 2 - 320, 330], 'arial', 'Вправо')
+KeyRegister(settings, [WIDTH // 2 - 200, 330], 'd')
 # меню
-Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Играть', all_sprites)
-Button(menu, [WIGHT // 2 - 200, 250], [350, 70], 'Настройки', settings)
-Button(menu, [WIGHT // 2 - 200, 150], [350, 70], 'Обучение', all_sprites)
+Label(menu, [WIDTH // 2 - 380, 50], 'Comic Sans MS', 'ЗАБАВНЫЕ ПРИКЛЮЧЕНИЯ', font_size=50)
+
+Button(menu, [WIDTH // 2 - 200, 150], [350, 70], 'Играть', all_sprites)
+Button(menu, [WIDTH // 2 - 200, 250], [350, 70], 'Обучение', all_sprites)
+Button(menu, [WIDTH // 2 - 200, 350], [350, 70], 'Настройки', settings)
+Button(menu, [WIDTH // 2 - 200, 450], [350, 70], 'Об игре', about)
 Button(menu, [0, 0], [40, 40], '←')
+# описание игры
+# НЕ СДЕЛАНО!!!
+Button(about, [0, 0], [40, 40], '←', menu)
+Label(about, [60, 10], 'arial', 'ВСТАВИТЬ ОПИСАНИЕ (ctrl+c, ctrl+v из презентации) :)', font_size=30)
 # игру
 Button(all_sprites, [0, 0], [40, 40], '←', menu)
 
@@ -180,6 +220,9 @@ npc_visited = False
 
 # камера
 camera = Camera()
+
+# симуляция
+########################################################################################################################
 
 # запуск симуляции
 if __name__ == '__main__':
