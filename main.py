@@ -15,7 +15,7 @@ from platform import PlatformSlippery, Platform
 from platform import Platform, PlatformSlippery, PlatformFire, PlatformMove
 from new import MainHero
 from utilities import Background, sprite_distance
-from npc import NPC, Enemy
+from npc import NPC, EnemyMelee, EnemyRangeFly
 from data import timer_npc
 # import pygame_ai as pai
 from camera import Camera
@@ -118,6 +118,7 @@ class KeyRegister(pygame.sprite.Sprite):
         con = sqlite3.connect(os.path.join('data', 'storage.db'))
         cur = con.cursor()
         result = cur.execute("""SELECT nums, key FROM binds WHERE name = ?""", (self.db_link,)).fetchall()
+        print(result)
         self.nums, self.key = result[0]
         con.close()
 
@@ -198,6 +199,7 @@ all_sprites = pygame.sprite.Group()
 platform_sprites = pygame.sprite.Group()
 main_hero_sprite = pygame.sprite.Group()
 # меню
+about = pygame.sprite.Group()
 menu = pygame.sprite.Group()
 settings = pygame.sprite.Group()
 
@@ -206,16 +208,16 @@ settings = pygame.sprite.Group()
 Button(settings, [0, 0], [40, 40], '←', menu)
 
 Label(settings, [WIDTH // 2 - 320, 150], 'arial', 'Прыжок')
-KeyRegister(settings, [WIDTH // 2 - 200, 150], 'w')
+KeyRegister(settings, [WIDTH // 2 - 200, 150], 'Прыжок')
 
 Label(settings, [WIDTH // 2 - 320, 210], 'arial', 'Влево')
-KeyRegister(settings, [WIDTH // 2 - 200, 210], 'a')
+KeyRegister(settings, [WIDTH // 2 - 200, 210], 'Влево')
 
 Label(settings, [WIDTH // 2 - 320, 270], 'arial', 'Crouch')
-KeyRegister(settings, [WIDTH // 2 - 200, 270], 's')
+KeyRegister(settings, [WIDTH // 2 - 200, 270], 'Crouch')
 
 Label(settings, [WIDTH // 2 - 320, 330], 'arial', 'Вправо')
-KeyRegister(settings, [WIDTH // 2 - 200, 330], 'd')
+KeyRegister(settings, [WIDTH // 2 - 200, 330], 'Вправо')
 # меню
 Label(menu, [WIDTH // 2 - 380, 50], 'Comic Sans MS', 'ЗАБАВНЫЕ ПРИКЛЮЧЕНИЯ', font_size=50)
 
@@ -229,7 +231,7 @@ Button(menu, [0, 0], [40, 40], '←')
 Button(about, [0, 0], [40, 40], '←', menu)
 Label(about, [60, 10], 'arial', 'ВСТАВИТЬ ОПИСАНИЕ (ctrl+c, ctrl+v из презентации) :)', font_size=30)
 # игру
-Button(all_sprites, [0, 0], [40, 40], '←', menu)
+button_in_game = Button(all_sprites, [0, 0], [40, 40], '←', menu)
 
 # активное окно
 active_sprites = menu
@@ -247,7 +249,7 @@ generate_level(load_level('map.txt'))
 npc_visited = False
 
 # камера
-camera = Camera(WIGHT, HEIGHT, main_hero)
+camera = Camera(WIDTH, HEIGHT, main_hero)
 
 # симуляция
 ########################################################################################################################
