@@ -224,12 +224,12 @@ Label(menu, [WIDTH // 2 - 380, 50], 'Comic Sans MS', 'ЗАБАВНЫЕ ПРИК�
 Button(menu, [WIDTH // 2 - 200, 150], [350, 70], 'Играть', all_sprites)
 Button(menu, [WIDTH // 2 - 200, 250], [350, 70], 'Обучение', all_sprites)
 Button(menu, [WIDTH // 2 - 200, 350], [350, 70], 'Настройки', settings)
-Button(menu, [WIDTH // 2 - 200, 450], [350, 70], 'Об игре', about)
+#Button(menu, [WIDTH // 2 - 200, 450], [350, 70], 'Об игре', about)
 Button(menu, [0, 0], [40, 40], '←')
 # описание игры
 # НЕ СДЕЛАНО!!!
-Button(about, [0, 0], [40, 40], '←', menu)
-Label(about, [60, 10], 'arial', 'ВСТАВИТЬ ОПИСАНИЕ (ctrl+c, ctrl+v из презентации) :)', font_size=30)
+#Button(about, [0, 0], [40, 40], '←', menu)
+#Label(about, [60, 10], 'arial', 'ВСТАВИТЬ ОПИСАНИЕ (ctrl+c, ctrl+v из презентации) :)', font_size=30)
 # игру
 button_in_game = Button(all_sprites, [0, 0], [40, 40], '←', menu)
 
@@ -240,8 +240,8 @@ active_sprites = menu
 # герой, уровень
 
 main_hero = MainHero(all_sprites, platform_sprites, (200, 100))
-enemy_melee = EnemyMelee(all_sprites, platform_sprites, (200, 100))
-enemy_range_fly = EnemyRangeFly(all_sprites, platform_sprites, (200, 100))
+enemy_melee = EnemyMelee(all_sprites, platform_sprites, (200, 150))
+#enemy_range_fly = EnemyRangeFly(all_sprites, platform_sprites, (300, 200))
 
 npc = NPC(all_sprites, (500, 100), 'Ты встретил деда!')
 tick = clock.tick(60) / 1000
@@ -277,7 +277,7 @@ if __name__ == '__main__':
         else:
             pass
 
-        if sprite_distance(npc.rect, main_hero.rect) and not npc.npc_visited:
+        if sprite_distance(npc.rect, main_hero.rect, 130) and not npc.npc_visited:
             # print('amogus')
             starttime = pygame.time.get_ticks()
             timer_npc[0] = False
@@ -299,7 +299,16 @@ if __name__ == '__main__':
             # если персонаж сейчас посещает нпс
             if npc.npc_visit:
                 screen.blit(npc.text_surface, (430, 50))
-
+        if sprite_distance(main_hero.rect, enemy_melee.rect, 80) and not main_hero.hit:
+            main_hero.hp -= 1
+            main_hero.hit = True
+            main_hero.hit_timer = pygame.time.get_ticks()
+        if main_hero.hit:
+            if pygame.time.get_ticks() - main_hero.hit_timer >= 1000:
+                main_hero.hit = False
+                main_hero.hit_timer = 0
+        print(sprite_distance(main_hero.rect, enemy_melee.rect, 80))
+        print(main_hero.hp)
         active_sprites.update()
 
         # если экран игры
@@ -310,8 +319,8 @@ if __name__ == '__main__':
 
             # обновляем положение всех спрайтов
             for sprite in all_sprites:
-                if sprite != button_in_game:
-                    camera.apply(sprite)
+                #if sprite != button_in_game:
+                camera.apply(sprite)
             main_hero.last_position = main_hero.rect
             main_hero.position = main_hero.rect
 
