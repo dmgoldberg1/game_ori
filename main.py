@@ -179,6 +179,10 @@ def generate_level(level):
                 Platform(all_sprites, platform_sprites, (x, y))
             elif level[y][x] == '(':
                 PlatformSlippery(all_sprites, platform_sprites, (x, y))
+            elif level[y][x] == '_':
+                a = Platform(all_sprites, platform_sprites, (x, y))
+                print((a.rect.x, a.rect.y))
+                enemy1 = EnemyMelee(all_sprites, platform_sprites, (a.rect.x, a.rect.y), a)
 
 # расстановка спрайтов
 ########################################################################################################################
@@ -240,7 +244,7 @@ active_sprites = menu
 # герой, уровень
 
 main_hero = MainHero(all_sprites, platform_sprites, (200, 100))
-enemy_melee = EnemyMelee(all_sprites, platform_sprites, (200, 100))
+# enemy_melee = EnemyMelee(all_sprites, platform_sprites, (200, 100))
 enemy_range_fly = EnemyRangeFly(all_sprites, platform_sprites, (200, 100))
 
 npc = NPC(all_sprites, (500, 100), 'Ты встретил деда!')
