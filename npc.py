@@ -116,7 +116,7 @@ class EnemyMelee(pygame.sprite.Sprite):
                                                (y - self.rect.height - self.rect.y))
             self.position = pygame.Rect(self.rect)
         self.last_position = self.position
-        #self.rect.center = self.last_position  # Updates
+        self.rect.center = self.pos  # Updates
 
 
 class EnemyRangeFly(pygame.sprite.Sprite):
@@ -130,8 +130,7 @@ class EnemyRangeFly(pygame.sprite.Sprite):
         self.vel = pygame.math.Vector2(0, 0)
         self.direction = random.randint(0, 1)  # 0 for Right, 1 for Left
         self.vel.x = random.randint(2, 6) / 2  # Randomized velocity of the generated enemy
-        self.vel.y = 3
-
+        self.vel.y = random.randint(2, 6) / 2
         self.platform_sprite_group = platform_sprite_group
         self.last_position = pygame.Rect(self.rect)
         self.state = {'на земле': True,
@@ -139,7 +138,7 @@ class EnemyRangeFly(pygame.sprite.Sprite):
 
     def update(self, *args):
         # Causes the enemy to change directions upon reaching the end of screen
-        #self.rect = self.rect.move(self.vel.x, self.vel.y)
+        self.rect = self.rect.move(self.vel.x, self.vel.y)
         self.position = pygame.Rect(self.rect)
         if self.position.x >= 300:
             self.direction = 1
@@ -266,3 +265,22 @@ class EnemyRangeFly(pygame.sprite.Sprite):
                 self.state['на земле'] = True
             else:
                 self.state['на земле'] = False
+
+#НЕ Сделано
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, group, platform_sprite_group, coords):
+        super().__init__(group)
+        self.image = load_image('temp.png')
+        self.rect = self.image.get_rect(topleft=coords)
+        self.platform_sprite_group = platform_sprite_group
+        self.x = coords[0]
+        self.y = coords[1]
+        self.speed_x = 8
+        self.speed_y = 0
+        self.dest_x = 0
+        self.dest_y = 0
+
+
+    def update(self, *args):
+        self.x += self.speed_x
+

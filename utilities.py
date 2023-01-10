@@ -31,10 +31,10 @@ def load_image(name, colorkey=None):
     return image
 
 
-def sprite_distance(rect1, rect2):
+def sprite_distance(rect1, rect2, dist):
     x1, y1 = rect1.topleft
     x2, y2 = rect2.topleft
-    if abs(x1 - x2) < 130 and abs(y1 - y2) < 130:
+    if abs(x1 - x2) <= dist and abs(y1 - y2) <= dist:
         return True
     else:
         return False

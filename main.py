@@ -244,7 +244,7 @@ active_sprites = menu
 # герой, уровень
 
 main_hero = MainHero(all_sprites, platform_sprites, (200, 100))
-# enemy_melee = EnemyMelee(all_sprites, platform_sprites, (200, 100))
+enemy_melee = EnemyMelee(all_sprites, platform_sprites, (200, 100))
 enemy_range_fly = EnemyRangeFly(all_sprites, platform_sprites, (200, 100))
 
 npc = NPC(all_sprites, (500, 100), 'Ты встретил деда!')
@@ -281,7 +281,7 @@ if __name__ == '__main__':
         else:
             pass
 
-        if sprite_distance(npc.rect, main_hero.rect) and not npc.npc_visited:
+        if sprite_distance(npc.rect, main_hero.rect, 130) and not npc.npc_visited:
             # print('amogus')
             starttime = pygame.time.get_ticks()
             timer_npc[0] = False
@@ -303,7 +303,16 @@ if __name__ == '__main__':
             # если персонаж сейчас посещает нпс
             if npc.npc_visit:
                 screen.blit(npc.text_surface, (430, 50))
-
+        if sprite_distance(main_hero.rect, enemy_melee.rect, 80) and not main_hero.hit:
+            main_hero.hp -= 1
+            main_hero.hit = True
+            main_hero.hit_timer = pygame.time.get_ticks()
+        if main_hero.hit:
+            if pygame.time.get_ticks() - main_hero.hit_timer >= 1000:
+                main_hero.hit = False
+                main_hero.hit_timer = 0
+        print(sprite_distance(main_hero.rect, enemy_melee.rect, 80))
+        print(main_hero.hp)
         active_sprites.update()
 
         # если экран игры
