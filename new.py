@@ -2,7 +2,7 @@ import pygame
 import os
 import sqlite3
 from data import timer_npc
-from utilities import load_image
+from utilities import load_image, move_to_the_point
 
 # настройки окна
 size = WIDHT, HEIGHT = 1000, 600
@@ -25,7 +25,7 @@ class MainHero(pygame.sprite.Sprite):
     # print(image.get_rect())
     image = pygame.transform.scale(image, (151 // 2, 186 // 2))
 
-    def __init__(self, group, platform_sprite_group, coords):
+    def __init__(self, group, platform_sprite_group):
         super().__init__(group)
         self.group = group
         self.platform_sprite_group = platform_sprite_group
@@ -47,8 +47,9 @@ class MainHero(pygame.sprite.Sprite):
 
         # расположение на экране
         self.rect = self.image.get_rect()
-        self.rect.x = coords[0]
-        self.rect.y = coords[1]
+        self.rect.x = 0
+        self.rect.y = 0
+        move_to_the_point(self, 'герой')
 
         # характеритики
         self.hero_widht = self.image.get_rect()[2]
@@ -90,7 +91,7 @@ class MainHero(pygame.sprite.Sprite):
 
         if self.ud_buttons != [self.get_from_db('Прыжок'), 1073741906]:
             self.ud_buttons = [self.get_from_db('Прыжок'), 1073741906]
-            
+
         # обработка событий
         if args:
             if args[0].type == pygame.KEYDOWN and timer_npc[0]:
@@ -161,7 +162,7 @@ class MainHero(pygame.sprite.Sprite):
 
                     # обработка пересечения с низом - правом персонажа
                     if collide_down_right:
-                        #print('d_r')
+                        # print('d_r')
                         if self.state['на земле']:
                             self.y_vel = 0
                         if not platform_rect.collidepoint(self.last_position.right, self.last_position.bottom):
@@ -175,7 +176,7 @@ class MainHero(pygame.sprite.Sprite):
 
                     # обработка пересечения с низом - левом персонажа
                     if collide_down_left:
-                        #print('d_l')
+                        # print('d_l')
                         if self.state['на земле']:
                             self.y_vel = 0
                         if not platform_rect.collidepoint(self.last_position.left, self.last_position.bottom):
@@ -189,10 +190,10 @@ class MainHero(pygame.sprite.Sprite):
 
                     # обработка пересечения с верхом - правом персонажа
                     if collide_top_right:
-                        #print('t_r')
+                        # print('t_r')
                         # врезается в потолок, стоя на земле
                         if self.state['на земле']:
-                            #print(collide_top_right)
+                            # print(collide_top_right)
                             self.y_vel = 0
                             x = min(collide_top_right[0][0], collide_top_right[-1][0])
                             y = max(collide_top_right[0][1], collide_top_right[-1][1])
@@ -200,7 +201,7 @@ class MainHero(pygame.sprite.Sprite):
                                                        (y - self.rect.y))
                         # врезается в потолок, в воздухе
                         elif not platform_rect.collidepoint(self.last_position.right, self.last_position.top):
-                            #print(collide_top_right)
+                            # print(collide_top_right)
                             self.state['на земле'] = False
                             self.y_vel = 0
                             x = min(collide_top_right[0][0], collide_top_right[-1][0])
@@ -210,10 +211,10 @@ class MainHero(pygame.sprite.Sprite):
 
                     # обработка пересечения с верхом - левом персонажа
                     if collide_top_left:
-                        #print('t_l')
+                        # print('t_l')
                         # врезается в потолок, стоя на земле
                         if self.state['на земле']:
-                            #print(collide_top_left)
+                            # print(collide_top_left)
                             self.y_vel = 0
                             x = max(collide_top_left[0][0], collide_top_left[-1][0])
                             y = max(collide_top_left[0][1], collide_top_left[-1][1])
@@ -221,7 +222,7 @@ class MainHero(pygame.sprite.Sprite):
                                                        (y - self.rect.y))
                         # врезается в потолок, в воздухе
                         elif not platform_rect.collidepoint(self.last_position.left, self.last_position.top):
-                            #print(collide_top_left)
+                            # print(collide_top_left)
                             self.state['на земле'] = False
                             self.y_vel = 0
                             x = max(collide_top_left[0][0], collide_top_left[-1][0])
@@ -248,7 +249,8 @@ class MainHero(pygame.sprite.Sprite):
             # упал - умер - возродился
             if self.rect.y > HEIGHT or self.hp == 0:  # HEIGHT - берется из файла mainhero.py
                 self.kill()
-                MainHero(self.group, self.platform_sprite_group, (self.platform.rect.x, self.platform.rect.y - self.rect.height))
+                MainHero(self.group, self.platform_sprite_group,
+                         (self.platform.rect.x, self.platform.rect.y - self.rect.height))
                 self.hp = 10
 
             # запоминаем старую позицию
@@ -256,7 +258,7 @@ class MainHero(pygame.sprite.Sprite):
 
 
 # добавление героя в спрайты
-MainHero(all_sprites, platform_sprites, (200, 100))
+MainHero(all_sprites, platform_sprites)
 
 # запуск симуляции
 if __name__ == '__main__':
