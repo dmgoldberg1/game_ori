@@ -1,6 +1,7 @@
 import os
 import sys
 import pygame
+import sqlite3
 
 
 # создание фона
@@ -38,3 +39,12 @@ def sprite_distance(rect1, rect2, dist):
         return True
     else:
         return False
+
+def move_to_the_point(obj, db_tag):
+    con = sqlite3.connect(os.path.join('data', 'storage.db'))
+    cur = con.cursor()
+    result = cur.execute("""SELECT x, y FROM saved_coordinates WHERE tag = ?""", (db_tag,)).fetchall()
+    con.close()
+
+    obj.rect = obj.rect.move(*result[0])
+    print(obj.rect)
