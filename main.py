@@ -1,24 +1,19 @@
 # pygame
-import pygame
+import os
 # БД
 import sqlite3
-import os
-import time
+
+import pygame
 
 # import pygame_ai as pai
 from camera import Camera
 from data import timer_npc
 from new import MainHero
 from npc import NPC, EnemyMelee, EnemyRangeFly
-from platform import PlatformSlippery, Platform
-# классы-работники
-from platform import Platform, PlatformSlippery, PlatformFire, PlatformMove
-from new import MainHero
-from utilities import Background, sprite_distance
-from npc import NPC, EnemyMelee, EnemyRangeFly
-from data import timer_npc
 # import pygame_ai as pai
-from camera import Camera
+# классы-работники
+from platform import Platform, PlatformSlippery
+from utilities import Background, sprite_distance
 
 
 # рабочие классы/функции
@@ -182,7 +177,8 @@ def generate_level(level):
             elif level[y][x] == '_':
                 a = Platform(all_sprites, platform_sprites, (x, y))
                 print((a.rect.x, a.rect.y))
-                enemy1 = EnemyMelee(all_sprites, platform_sprites, (a.rect.x, a.rect.y), a)
+                enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites, a)
+
 
 # расстановка спрайтов
 ########################################################################################################################
@@ -202,6 +198,8 @@ BackGround = Background('forest.jpg', [0, 0])
 all_sprites = pygame.sprite.Group()
 platform_sprites = pygame.sprite.Group()
 main_hero_sprite = pygame.sprite.Group()
+enemy_sprites = pygame.sprite.Group()
+
 # меню
 about = pygame.sprite.Group()
 menu = pygame.sprite.Group()
@@ -244,7 +242,6 @@ active_sprites = menu
 # герой, уровень
 
 main_hero = MainHero(all_sprites, platform_sprites, (200, 100))
-enemy_melee = EnemyMelee(all_sprites, platform_sprites, (200, 100))
 enemy_range_fly = EnemyRangeFly(all_sprites, platform_sprites, (200, 100))
 
 npc = NPC(all_sprites, (500, 100), 'Ты встретил деда!')
@@ -303,16 +300,19 @@ if __name__ == '__main__':
             # если персонаж сейчас посещает нпс
             if npc.npc_visit:
                 screen.blit(npc.text_surface, (430, 50))
-        if sprite_distance(main_hero.rect, enemy_melee.rect, 80) and not main_hero.hit:
-            main_hero.hp -= 1
-            main_hero.hit = True
-            main_hero.hit_timer = pygame.time.get_ticks()
-        if main_hero.hit:
-            if pygame.time.get_ticks() - main_hero.hit_timer >= 1000:
-                main_hero.hit = False
-                main_hero.hit_timer = 0
-        print(sprite_distance(main_hero.rect, enemy_melee.rect, 80))
-        print(main_hero.hp)
+
+        for enemy in enemy_sprites:
+            if sprite_distance(main_hero.rect, enemy.rect, 80) and not main_hero.hit:
+                main_hero.hp -= 1
+                main_hero.hit = True
+                main_hero.hit_timer = pygame.time.get_ticks()
+            if main_hero.hit:
+                if pygame.time.get_ticks() - main_hero.hit_timer >= 1000:
+                    main_hero.hit = False
+                    main_hero.hit_timer = 0
+            print(sprite_distance(main_hero.rect, enemy.rect, 80))
+            print(main_hero.hp)
+
         active_sprites.update()
 
         # если экран игры

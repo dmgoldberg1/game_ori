@@ -6,9 +6,7 @@ from utilities import load_image
 
 all_sprites = pygame.sprite.Group()
 
-
 WIDTH, HEIGHT = 1000, 600
-
 
 
 class NPC(pygame.sprite.Sprite):
@@ -32,22 +30,31 @@ class NPC(pygame.sprite.Sprite):
 
 # npc jgk
 class EnemyMelee(pygame.sprite.Sprite):
-    def __init__(self, group, platform_sprite_group, coords, platform):
+    def __init__(self, group, special_group, platform_sprite_group, platform):
         super().__init__(group)
         self.image = load_image('temp.png')
-        self.rect = self.image.get_rect(topleft=coords)
+
+        self.rect = self.image.get_rect()
+        # self.rect.x = coords[0]
+        # self.rect.y = coords[1]
+        self.rect.x, self.rect.y = platform.rect.x, platform.rect.y - self.rect.h
+        self.mask = pygame.mask.from_surface(self.image)
+
         self.pos = pygame.math.Vector2(0, 0)
         self.pos.x = self.rect.x
         self.pos.y = self.rect.y
+
         self.vel = pygame.math.Vector2(0, 0)
         self.direction = random.randint(0, 1)  # 0 for Right, 1 for Left
         self.vel.x = random.randint(2, 6) / 2  # Randomized velocity of the generated enemy
         self.gravity = 3
+
         self.platform = platform
         self.platform_sprite_group = platform_sprite_group
         self.last_position = pygame.Rect(self.rect)
         self.state = {'на земле': True,
                       'карабкается': False}
+        self.add(special_group)
         # if self.direction == 0:
         # self.pos.x = 0
         # self.pos.y = 235
@@ -57,22 +64,22 @@ class EnemyMelee(pygame.sprite.Sprite):
 
     def update(self, *args):
         # Causes the enemy to change directions upon reaching the end of screen
-        #self.rect = self.rect.move(self.vel.x, self.vel.y)
+        # self.rect = self.rect.move(self.vel.x, self.vel.y)
         self.position = pygame.Rect(self.rect)
         if self.platform.rect.x <= self.position.x <= self.platform.rect.x + 10:
             self.direction = 0
         elif self.platform.rect.x + self.platform.rect.w - 10 <= self.position.x <= self.platform.rect.x + self.platform.rect.w:
             self.direction = 1
-            #self.rect.x += self.vel.x
+            # self.rect.x += self.vel.x
 
         if self.direction == 0:
             self.rect.x += self.vel.x
-            #print(self.pos.x)
+            # print(self.pos.x)
         if self.direction == 1:
-            #print(self.rect.x)
+            # print(self.rect.x)
             self.rect.x -= self.vel.x
         self.rect.y += self.gravity
-        #print(self.rect.y)
+        print(self.rect.y)
 
         for i in self.platform_sprite_group:
             # print(i.mask.get_bounding_rects()[0])
@@ -116,7 +123,7 @@ class EnemyMelee(pygame.sprite.Sprite):
                                                (y - self.rect.height - self.rect.y))
             self.position = pygame.Rect(self.rect)
         self.last_position = self.position
-        self.rect.center = self.pos  # Updates
+        # self.rect.center = self.pos  # Updates
 
 
 class EnemyRangeFly(pygame.sprite.Sprite):
@@ -160,7 +167,6 @@ class EnemyRangeFly(pygame.sprite.Sprite):
             self.rect.x -= self.vel.x
 
             updown = random.randint(0, 2)
-
 
             if updown == 0:
                 self.rect.y += self.vel.y
@@ -266,7 +272,8 @@ class EnemyRangeFly(pygame.sprite.Sprite):
             else:
                 self.state['на земле'] = False
 
-#НЕ Сделано
+
+# НЕ Сделано
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, group, platform_sprite_group, coords):
         super().__init__(group)
@@ -280,7 +287,5 @@ class Bullet(pygame.sprite.Sprite):
         self.dest_x = 0
         self.dest_y = 0
 
-
     def update(self, *args):
         self.x += self.speed_x
-
