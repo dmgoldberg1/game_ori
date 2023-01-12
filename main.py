@@ -26,11 +26,14 @@ class Button(pygame.sprite.Sprite):
 
         # цвет всех кнопок (можно менять)
         self.image = pygame.Surface(size)
-        self.image.fill(pygame.Color("blue"))
+        self.image.fill(pygame.Color("orange"))
+
+        pygame.draw.rect(self.image, pygame.Color("brown"),
+                         [0, 0] + size, 5)
 
         # текст (можно менять настройки)
         f1 = pygame.font.SysFont('arial', 36)
-        text1 = f1.render(description, True, (255, 0, 0))
+        text1 = f1.render(description, True, pygame.Color("brown"))
         self.image.blit(text1, ((size[0] - text1.get_width()) // 2, (size[1] - text1.get_height()) // 2))
 
         # координаты
@@ -77,7 +80,7 @@ class KeyRegister(pygame.sprite.Sprite):
 
         self.image = pygame.Surface(self.size)
         self.active = False
-        self.draw((0, 255, 0))
+        self.draw(pygame.Color("orange"))
 
         # координаты
         self.rect = self.image.get_rect()
@@ -89,7 +92,7 @@ class KeyRegister(pygame.sprite.Sprite):
         clicked = args and self.rect.collidepoint(pygame.mouse.get_pos())
         if clicked and args[0].type == pygame.MOUSEBUTTONDOWN:
             self.active = True
-            self.draw((0, 123, 0))
+            self.draw(pygame.Color("lime"))
 
         elif clicked and args[0].type == pygame.KEYDOWN and self.active:
             self.nums = args[0].key
@@ -107,7 +110,7 @@ class KeyRegister(pygame.sprite.Sprite):
             con.close()
 
             self.active = False
-            self.draw((0, 255, 0))
+            self.draw(pygame.Color("orange"))
 
     def pick_from_db(self):
         con = sqlite3.connect(os.path.join('data', 'storage.db'))
@@ -132,7 +135,7 @@ class Label(pygame.sprite.Sprite):
         super().__init__(group)
 
         f1 = pygame.font.SysFont(font, font_size)
-        text1 = f1.render(description, True, (255, 0, 0))
+        text1 = f1.render(description, True, pygame.Color("brown"))
 
         self.size = [text1.get_width(), text1.get_height()]
         self.image = pygame.Surface(self.size)
@@ -241,7 +244,7 @@ active_sprites = menu
 # drag = pai.steering.kinematic.Drag(15)
 # герой, уровень
 
-main_hero = MainHero(all_sprites, platform_sprites, (200, 100))
+main_hero = MainHero(all_sprites, platform_sprites)
 enemy_range_fly = EnemyRangeFly(all_sprites, platform_sprites, (200, 100))
 
 npc = NPC(all_sprites, (500, 100), 'Ты встретил деда!')
@@ -331,4 +334,17 @@ if __name__ == '__main__':
         active_sprites.draw(screen)
         pygame.display.flip()
 
+    # сохраняем позицию игрока
+    con = sqlite3.connect(os.path.join('data', 'storage.db'))
+    cur = con.cursor()
+
+    result = cur.execute("""UPDATE saved_coordinates SET x = ? WHERE tag = ?""",
+                         (main_hero.rect.x, 'герой')).fetchall()
+    result = cur.execute("""UPDATE saved_coordinates SET y = ? WHERE tag = ?""",
+                         (main_hero.rect.y, 'герой')).fetchall()
+
+    con.commit()
+    con.close()
+
+    # закрываем окно
     pygame.quit()
