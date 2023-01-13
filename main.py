@@ -8,7 +8,7 @@ import pygame
 # import pygame_ai as pai
 from camera import Camera
 from data import timer_npc
-from new import MainHero
+from mainhero import MainHero
 from npc import NPC, EnemyMelee, EnemyRangeFly
 # import pygame_ai as pai
 # классы-работники
@@ -53,10 +53,8 @@ class Button(pygame.sprite.Sprite):
 
             # сделал такую проверку на выход из игры
             if self.linked_page:
-                global active_sprites
                 active_sprites = self.linked_page
             else:
-                global running
                 running = False
 
         elif args and args[0].type == pygame.KEYDOWN:
@@ -220,8 +218,8 @@ KeyRegister(settings, [WIDTH // 2 - 200, 150], 'Прыжок')
 Label(settings, [WIDTH // 2 - 320, 210], 'arial', 'Влево')
 KeyRegister(settings, [WIDTH // 2 - 200, 210], 'Влево')
 
-Label(settings, [WIDTH // 2 - 320, 270], 'arial', 'Crouch')
-KeyRegister(settings, [WIDTH // 2 - 200, 270], 'Crouch')
+Label(settings, [WIDTH // 2 - 320, 270], 'arial', 'Карта')
+KeyRegister(settings, [WIDTH // 2 - 200, 270], 'Карта')
 
 Label(settings, [WIDTH // 2 - 320, 330], 'arial', 'Вправо')
 KeyRegister(settings, [WIDTH // 2 - 200, 330], 'Вправо')
@@ -268,8 +266,19 @@ if __name__ == '__main__':
 
         # обработка событий - отклик
         for event in pygame.event.get():
+            # закрытие окна
             if event.type == pygame.QUIT:
                 running = False
+
+            # карта (игра замерзает)
+            if event.type == pygame.KEYDOWN and event.key == main_hero.get_from_db('Карта'):
+                size = ((2000, 1000) if size != (2000, 1000) else (1000, 600))
+                main_hero.pause = True if not main_hero.pause else False
+                for i in enemy_sprites:
+                    i.pause = True if not i.pause else False
+                enemy_range_fly.pause = True if not enemy_range_fly.pause else False
+                pygame.display.set_mode(size)
+                os.environ['Sp_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 0)
 
             # обновление спрайтов
             active_sprites.update(event)
