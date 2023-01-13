@@ -249,8 +249,7 @@ class MainHero(pygame.sprite.Sprite):
             # упал - умер - возродился
             if self.rect.y > HEIGHT or self.hp == 0:  # HEIGHT - берется из файла mainhero.py
                 self.kill()
-                MainHero(self.group, self.platform_sprite_group,
-                         (self.platform.rect.x, self.platform.rect.y - self.rect.height))
+                MainHero(self.group, self.platform_sprite_group)
                 self.hp = 10
 
             # запоминаем старую позицию

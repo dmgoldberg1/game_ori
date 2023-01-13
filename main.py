@@ -12,7 +12,7 @@ from new import MainHero
 from npc import NPC, EnemyMelee, EnemyRangeFly
 # import pygame_ai as pai
 # классы-работники
-from platform import Platform, PlatformSlippery
+from platform import Platform, PlatformSlippery, PlatformFire
 from utilities import Background, sprite_distance
 
 
@@ -177,6 +177,8 @@ def generate_level(level):
                 Platform(all_sprites, platform_sprites, (x, y))
             elif level[y][x] == '(':
                 PlatformSlippery(all_sprites, platform_sprites, (x, y))
+            elif level[y][x] == '/':
+                PlatformFire(all_sprites, platform_sprites, (x, y))
             elif level[y][x] == '_':
                 a = Platform(all_sprites, platform_sprites, (x, y))
                 print((a.rect.x, a.rect.y))
