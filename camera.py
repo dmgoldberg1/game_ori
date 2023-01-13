@@ -44,5 +44,5 @@ class Camera:
             # print('a')
             # print(self.main_hero_position)
             # print('a')
-        print(self.dx, self.dy)
+        # print(self.dx, self.dy)
         self.main_hero_last_position = target.rect

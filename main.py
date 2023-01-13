@@ -8,8 +8,9 @@ import pygame
 # import pygame_ai as pai
 from camera import Camera
 from data import timer_npc
-from mainhero import MainHero
+from new import MainHero
 from npc import NPC, EnemyMelee, EnemyRangeFly
+from nullobject import Null_Object
 # import pygame_ai as pai
 # классы-работники
 from platform import Platform, PlatformSlippery, PlatformFire
@@ -113,8 +114,9 @@ class KeyRegister(pygame.sprite.Sprite):
     def pick_from_db(self):
         con = sqlite3.connect(os.path.join('data', 'storage.db'))
         cur = con.cursor()
+        # print(self.db_link)
         result = cur.execute("""SELECT nums, key FROM binds WHERE name = ?""", (self.db_link,)).fetchall()
-        print(result)
+        # print(result)
         self.nums, self.key = result[0]
         con.close()
 
@@ -180,7 +182,9 @@ def generate_level(level):
             elif level[y][x] == '_':
                 a = Platform(all_sprites, platform_sprites, (x, y))
                 print((a.rect.x, a.rect.y))
-                enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites, a)
+                enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
+            elif level[y][x] == '@':
+                Null_Object(all_sprites)
 
 
 # расстановка спрайтов
@@ -324,8 +328,8 @@ if __name__ == '__main__':
                 if pygame.time.get_ticks() - main_hero.hit_timer >= 1000:
                     main_hero.hit = False
                     main_hero.hit_timer = 0
-            print(sprite_distance(main_hero.rect, enemy.rect, 80))
-            print(main_hero.hp)
+            # print(sprite_distance(main_hero.rect, enemy.rect, 80))
+            # print(main_hero.hp)
 
         active_sprites.update()
 
