@@ -39,6 +39,7 @@ class MainHero(pygame.sprite.Sprite):
         self.hit_timer = 0
         self.in_air = True
         self.button_lr_pressed = False
+        self.pause = False
 
         # игровые моменты
         self.platform_type = None
@@ -247,7 +248,7 @@ class MainHero(pygame.sprite.Sprite):
                 self.state['на земле'] = False
 
             # упал - умер - возродился
-            if self.rect.y > HEIGHT or self.hp == 0:  # HEIGHT - берется из файла mainhero.py
+            if self.rect.y > HEIGHT:  # HEIGHT - берется из файла mainhero.py or self.hp == 0
                 self.kill()
                 MainHero(self.group, self.platform_sprite_group)
                 self.hp = 10
