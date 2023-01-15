@@ -9,7 +9,7 @@ import pygame
 from camera import Camera
 from data import timer_npc
 from new import MainHero
-from npc import NPC, EnemyMelee, EnemyRangeFly
+from npc import NPC, EnemyMelee, EnemyRangeFly, Bullet, Boss
 from nullobject import Null_Object
 # import pygame_ai as pai
 # классы-работники
@@ -167,7 +167,6 @@ def load_level(filename, count):
     return c, len(c[0])
 
 
-
 # прорисовка уровней
 def generate_level(l, number):
     level, count = l
@@ -187,6 +186,10 @@ def generate_level(l, number):
                     a = Platform(all_sprites, platform_sprites, (x, y))
                     print((a.rect.x, a.rect.y))
                     enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
+                elif level[y][x] == '^':
+                    a = Platform(all_sprites, platform_sprites, (x, y))
+                    print((a.rect.x, a.rect.y))
+                    boss = Boss(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
     elif number == 1:
         for y in range(len(level)):
             for x in range(len(level[y])):
@@ -229,7 +232,7 @@ def generate_level(l, number):
 # настройки окна
 pygame.init()
 size = WIDTH, HEIGHT = 1000, 600
-FPS = 30
+FPS = 60
 screen = pygame.display.set_mode(size)
 running = True
 clock = pygame.time.Clock()
@@ -295,12 +298,16 @@ npc = NPC(all_sprites, (500, 100), 'Ты встретил деда!')
 tick = clock.tick(60) / 1000
 
 board1 = generate_level(load_level('map.txt', 0), 0)
-board2 = generate_level(load_level('map2.txt', 1), 1) * 2
-board3 = generate_level(load_level('map3.txt', 2), 2) * 2
-print(board1, board2, board3)
+# board2 = generate_level(load_level('map2.txt', 1), 1) * 2
+# board3 = generate_level(load_level('map3.txt', 2), 2) * 2
+# print(board1, board2, board3)
 
 npc_visited = False
-
+fire = True
+fire_boss = True
+bullets = []
+bullets_boss = []
+test = True
 # камера
 camera = Camera(WIDTH, HEIGHT, main_hero)
 
@@ -336,18 +343,19 @@ if __name__ == '__main__':
         screen.fill((255, 255, 255))
 
         # обрабатываем границы
-        if board1 - 200 <= main_hero.rect.x - null_object.rect.x <= board1 + 200 and len(main_hero.platform_sprite_group) == 1:
+        if board1 - 200 <= main_hero.rect.x - null_object.rect.x <= board1 + 200 and len(
+                main_hero.platform_sprite_group) == 1:
             main_hero.platform_sprite_group.append(platform_sprites1)
             print('aaaaaaaaa')
-        elif board2 - 200 <= main_hero.rect.x - null_object.rect.x <= board2 + 200 and len(main_hero.platform_sprite_group) == 2:
-            main_hero.platform_sprite_group.append(platform_sprites2) #.append(platform_sprites2)
-            print('aaaaaaaaa')
-        elif board1 + 200 <= main_hero.rect.x - null_object.rect.x <= board2 - 200 and len(main_hero.platform_sprite_group) == 2:
-            main_hero.platform_sprite_group = [platform_sprites1]
-            print('bbbbbbbbbbbb')
-        elif board2 + 200 <= main_hero.rect.x - null_object.rect.x <= board3 - 200 and len(main_hero.platform_sprite_group) == 2:
-            main_hero.platform_sprite_group = main_hero.platform_sprite_group[1:]
-            print('bbbbbbbbbbbb')
+        # elif board2 - 200 <= main_hero.rect.x - null_object.rect.x <= board2 + 200 and len(main_hero.platform_sprite_group) == 2:
+        # main_hero.platform_sprite_group.append(platform_sprites2) #.append(platform_sprites2)
+        # print('aaaaaaaaa')
+        # elif board1 + 200 <= main_hero.rect.x - null_object.rect.x <= board2 - 200 and len(main_hero.platform_sprite_group) == 2:
+        # main_hero.platform_sprite_group = [platform_sprites1]
+        # print('bbbbbbbbbbbb')
+        # elif board2 + 200 <= main_hero.rect.x - null_object.rect.x <= board3 - 200 and len(main_hero.platform_sprite_group) == 2:
+        # main_hero.platform_sprite_group = main_hero.platform_sprite_group[1:]
+        # print('bbbbbbbbbbbb')
 
         # фон (на else можно поменять фон меню)
         if active_sprites == all_sprites:
@@ -379,6 +387,28 @@ if __name__ == '__main__':
                 screen.blit(npc.text_surface, (430, 50))
 
         for enemy in enemy_sprites:
+            if type(enemy) == Boss:
+                if fire_boss and sprite_distance(main_hero.rect, enemy.rect, 100):
+                    print('amogiSSS')
+                    bullet = Bullet(enemy.rect.x, enemy.rect.y, main_hero.position.x,
+                                    main_hero.position.y,
+                                    all_sprites, platform_sprites)
+                    bullets_boss.append(bullet)
+                    bullet.kill()
+                    fire_boss = False
+                    bullet.fire_timer = pygame.time.get_ticks()
+
+                for bullet in bullets_boss[:]:
+                    bullet.update()
+                    if 0 <= abs(main_hero.rect.x - int(bullet.pos[0] // 1)) <= 15 and 0 <= abs(
+                            main_hero.rect.y - int(bullet.pos[1] // 1)) <= 15:
+                        main_hero.hp -= 1
+                    if not screen.get_rect().collidepoint(bullet.pos):
+                        bullets_boss.remove(bullet)
+                    # print(f'''Герой: {main_hero.rect.x}, Пуля: {int(bullet.pos[0] // 1)}''')
+
+                for bullet in bullets_boss:
+                    bullet.draw(screen)
             if sprite_distance(main_hero.rect, enemy.rect, 80) and not main_hero.hit:
                 main_hero.hp -= 1
                 main_hero.hit = True
@@ -390,6 +420,38 @@ if __name__ == '__main__':
             # print(sprite_distance(main_hero.rect, enemy.rect, 80))
             # print(main_hero.hp)
 
+        # Стрельба летающих нпс
+
+        if fire and sprite_distance(main_hero.rect, enemy_range_fly.rect, 500):
+            bullet = Bullet(enemy_range_fly.rect.x, enemy_range_fly.rect.y, main_hero.position.x, main_hero.position.y,
+                            all_sprites, platform_sprites)
+            bullets.append(bullet)
+            test = False
+            bullet.kill()
+            fire = False
+            bullet.fire_timer = pygame.time.get_ticks()
+
+        for bullet in bullets[:]:
+            bullet.update()
+            if 0 <= abs(main_hero.rect.x - int(bullet.pos[0] // 1)) <= 15 and 0 <= abs(
+                    main_hero.rect.y - int(bullet.pos[1] // 1)) <= 15:
+                main_hero.hp -= 1
+            if not screen.get_rect().collidepoint(bullet.pos):
+                bullets.remove(bullet)
+            # print(f'''Герой: {main_hero.rect.x}, Пуля: {int(bullet.pos[0] // 1)}''')
+
+        for bullet in bullets:
+            bullet.draw(screen)
+
+
+        # print(bullets)
+        # print(sprite_distance(main_hero.rect, bullet.rect, 150))
+
+        if not fire and pygame.time.get_ticks() - bullet.fire_timer >= 1000:
+            fire = True
+            fire_boss = True
+            bullet.fire_timer = 0
+        print(main_hero.hp)
         active_sprites.update()
 
         # если экран игры
