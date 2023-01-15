@@ -135,9 +135,10 @@ class MainHero(pygame.sprite.Sprite):
             self.in_air = True
 
             # обработка пересечений - цикл по пересечению с платформами
-            print(self.platform_sprite_group)
-            for platforms in self.platform_sprite_group:
-                for i in platforms:
+            # print(self.platform_sprite_group)
+            platforms = []
+            for p in self.platform_sprite_group:
+                for i in p:
                     # print(i.mask.get_bounding_rects()[0])
                     a, b, c, d = i.mask.get_bounding_rects()[0][:4]
                     platform = i
@@ -165,11 +166,11 @@ class MainHero(pygame.sprite.Sprite):
 
                         # обработка пересечения с низом - правом персонажа
                         if collide_down_right:
-                            # print('d_r')
+                            print('d_r')
                             if self.state['на земле']:
                                 self.y_vel = 0
                             if not platform_rect.collidepoint(self.last_position.right, self.last_position.bottom):
-                                # print(collide_down_right)
+                                print(collide_down_right)
                                 self.y_vel = 0
                                 self.state['на земле'] = True
                                 x = max(collide_down_right[0][0], collide_down_right[-1][0])
@@ -179,11 +180,11 @@ class MainHero(pygame.sprite.Sprite):
 
                         # обработка пересечения с низом - левом персонажа
                         if collide_down_left:
-                            # print('d_l')
+                            print('d_l')
                             if self.state['на земле']:
                                 self.y_vel = 0
                             if not platform_rect.collidepoint(self.last_position.left, self.last_position.bottom):
-                                # print(collide_down_left)
+                                print(collide_down_left)
                                 self.y_vel = 0
                                 self.state['на земле'] = True
                                 x = min(collide_down_left[0][0], collide_down_left[-1][0])
@@ -193,10 +194,10 @@ class MainHero(pygame.sprite.Sprite):
 
                         # обработка пересечения с верхом - правом персонажа
                         if collide_top_right:
-                            # print('t_r')
+                            print('t_r')
                             # врезается в потолок, стоя на земле
                             if self.state['на земле']:
-                                # print(collide_top_right)
+                                print(collide_top_right)
                                 self.y_vel = 0
                                 x = min(collide_top_right[0][0], collide_top_right[-1][0])
                                 y = max(collide_top_right[0][1], collide_top_right[-1][1])
@@ -204,7 +205,7 @@ class MainHero(pygame.sprite.Sprite):
                                                            (y - self.rect.y))
                             # врезается в потолок, в воздухе
                             elif not platform_rect.collidepoint(self.last_position.right, self.last_position.top):
-                                # print(collide_top_right)
+                                print(collide_top_right)
                                 self.state['на земле'] = False
                                 self.y_vel = 0
                                 x = min(collide_top_right[0][0], collide_top_right[-1][0])
@@ -214,10 +215,10 @@ class MainHero(pygame.sprite.Sprite):
 
                         # обработка пересечения с верхом - левом персонажа
                         if collide_top_left:
-                            # print('t_l')
+                            print('t_l')
                             # врезается в потолок, стоя на земле
                             if self.state['на земле']:
-                                # print(collide_top_left)
+                                print(collide_top_left)
                                 self.y_vel = 0
                                 x = max(collide_top_left[0][0], collide_top_left[-1][0])
                                 y = max(collide_top_left[0][1], collide_top_left[-1][1])
@@ -225,7 +226,7 @@ class MainHero(pygame.sprite.Sprite):
                                                            (y - self.rect.y))
                             # врезается в потолок, в воздухе
                             elif not platform_rect.collidepoint(self.last_position.left, self.last_position.top):
-                                # print(collide_top_left)
+                                print(collide_top_left)
                                 self.state['на земле'] = False
                                 self.y_vel = 0
                                 x = max(collide_top_left[0][0], collide_top_left[-1][0])
@@ -236,14 +237,12 @@ class MainHero(pygame.sprite.Sprite):
                         # обновление позиции
                         self.position = pygame.Rect(self.rect)
 
-                        # обновление статуса
-                        if (platform_rect.collidepoint(self.position.left, self.position.bottom)) or \
-                                (platform_rect.collidepoint(self.position.right, self.position.bottom)):
-                            self.state['на земле'] = True
-                            self.platform_type = platform.platform_type
-                            self.platform = platform
-                        else:
-                            self.state['на земле'] = False
+                        platforms.append([i, platform_rect.collidepoint(self.position.left, self.position.bottom),
+                                          platform_rect.collidepoint(self.position.right, self.position.bottom)])
+            if any(filter(lambda x: x[1] or x[2], platforms)):
+                self.state['на земле'] = True
+            else:
+                self.state['на земле'] = False
 
             # если не было пересечений
             if self.in_air:
