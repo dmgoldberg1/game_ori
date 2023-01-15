@@ -64,6 +64,7 @@ class EnemyMelee(pygame.sprite.Sprite):
 
 
     def update(self, *args):
+        # pass
         # Causes the enemy to change directions upon reaching the end of screen
         # self.rect = self.rect.move(self.vel.x, self.vel.y)
         if not self.pause:
