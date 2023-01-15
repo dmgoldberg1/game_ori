@@ -498,12 +498,8 @@ class Boss(pygame.sprite.Sprite):
                 if s < 500:
                     if round(self.main_hero_pos.x + self.main_hero_pos.w // 2) == round(self.position.x):
                         self.vel.x = 0
-
                     elif self.main_hero_pos.x + self.main_hero_pos.w // 2 < self.position.x:
                         self.vel.x = -random.randint(4, 8) / 2
-
-
-
                     else:
                         self.vel.x = random.randint(4, 8) / 2
 

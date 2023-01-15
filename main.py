@@ -298,8 +298,8 @@ npc = NPC(all_sprites, (500, 100), 'Ты встретил деда!')
 tick = clock.tick(60) / 1000
 
 board1 = generate_level(load_level('map.txt', 0), 0)
-# board2 = generate_level(load_level('map2.txt', 1), 1) * 2
-# board3 = generate_level(load_level('map3.txt', 2), 2) * 2
+board2 = generate_level(load_level('map2.txt', 1), 1) * 2
+board3 = generate_level(load_level('map3.txt', 2), 2) * 2
 # print(board1, board2, board3)
 
 npc_visited = False
@@ -347,15 +347,15 @@ if __name__ == '__main__':
                 main_hero.platform_sprite_group) == 1:
             main_hero.platform_sprite_group.append(platform_sprites1)
             print('aaaaaaaaa')
-        # elif board2 - 200 <= main_hero.rect.x - null_object.rect.x <= board2 + 200 and len(main_hero.platform_sprite_group) == 2:
-        # main_hero.platform_sprite_group.append(platform_sprites2) #.append(platform_sprites2)
-        # print('aaaaaaaaa')
-        # elif board1 + 200 <= main_hero.rect.x - null_object.rect.x <= board2 - 200 and len(main_hero.platform_sprite_group) == 2:
-        # main_hero.platform_sprite_group = [platform_sprites1]
-        # print('bbbbbbbbbbbb')
-        # elif board2 + 200 <= main_hero.rect.x - null_object.rect.x <= board3 - 200 and len(main_hero.platform_sprite_group) == 2:
-        # main_hero.platform_sprite_group = main_hero.platform_sprite_group[1:]
-        # print('bbbbbbbbbbbb')
+        elif board2 - 200 <= main_hero.rect.x - null_object.rect.x <= board2 + 200 and len(main_hero.platform_sprite_group) == 2:
+            main_hero.platform_sprite_group.append(platform_sprites2) #.append(platform_sprites2)
+            print('aaaaaaaaa')
+        elif board1 + 200 <= main_hero.rect.x - null_object.rect.x <= board2 - 200 and len(main_hero.platform_sprite_group) == 2:
+            main_hero.platform_sprite_group = [platform_sprites1]
+            print('bbbbbbbbbbbb')
+        elif board2 + 200 <= main_hero.rect.x - null_object.rect.x <= board3 - 200 and len(main_hero.platform_sprite_group) == 2:
+            main_hero.platform_sprite_group = main_hero.platform_sprite_group[1:]
+            print('bbbbbbbbbbbb')
 
         # фон (на else можно поменять фон меню)
         if active_sprites == all_sprites:
