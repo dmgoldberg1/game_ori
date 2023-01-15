@@ -136,8 +136,9 @@ class MainHero(pygame.sprite.Sprite):
 
             # обработка пересечений - цикл по пересечению с платформами
             print(self.platform_sprite_group)
-            for platforms in self.platform_sprite_group:
-                for i in platforms:
+            platforms = []
+            for p in self.platform_sprite_group:
+                for i in p:
                     # print(i.mask.get_bounding_rects()[0])
                     a, b, c, d = i.mask.get_bounding_rects()[0][:4]
                     platform = i
@@ -236,14 +237,12 @@ class MainHero(pygame.sprite.Sprite):
                         # обновление позиции
                         self.position = pygame.Rect(self.rect)
 
-                        # обновление статуса
-                        if (platform_rect.collidepoint(self.position.left, self.position.bottom)) or \
-                                (platform_rect.collidepoint(self.position.right, self.position.bottom)):
-                            self.state['на земле'] = True
-                            self.platform_type = platform.platform_type
-                            self.platform = platform
-                        else:
-                            self.state['на земле'] = False
+                        platforms.append([i, platform_rect.collidepoint(self.position.left, self.position.bottom),
+                                          platform_rect.collidepoint(self.position.right, self.position.bottom)])
+            if any(filter(lambda x: x[1] or x[2], platforms)):
+                self.state['на земле'] = True
+            else:
+                self.state['на земле'] = False
 
             # если не было пересечений
             if self.in_air:

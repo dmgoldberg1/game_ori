@@ -288,6 +288,7 @@ active_sprites = menu
 # герой, уровень
 
 main_hero = MainHero(all_sprites, [platform_sprites])
+level = 1
 null_object = Null_Object(all_sprites)
 enemy_range_fly = EnemyRangeFly(all_sprites, platform_sprites, (200, 100))
 
@@ -338,17 +339,25 @@ if __name__ == '__main__':
         # обрабатываем границы
         if board1 - 200 <= main_hero.rect.x - null_object.rect.x <= board1 + 200 and len(main_hero.platform_sprite_group) == 1:
             main_hero.platform_sprite_group.append(platform_sprites1)
+            level = 12
             print('aaaaaaaaa')
-        elif board2 - 200 <= main_hero.rect.x - null_object.rect.x <= board2 + 200 and len(main_hero.platform_sprite_group) == 2:
+        elif board2 - 200 <= main_hero.rect.x - null_object.rect.x <= board2 + 200 and len(main_hero.platform_sprite_group) == 1:
             main_hero.platform_sprite_group.append(platform_sprites2) #.append(platform_sprites2)
+            level = 23
             print('aaaaaaaaa')
+        elif 0 <= main_hero.rect.x - null_object.rect.x <= board1 - 200 and len(main_hero.platform_sprite_group) == 2:
+            main_hero.platform_sprite_group = [platform_sprites]
+            level = 1
+            print('bbbbbbbbbbbb')
         elif board1 + 200 <= main_hero.rect.x - null_object.rect.x <= board2 - 200 and len(main_hero.platform_sprite_group) == 2:
             main_hero.platform_sprite_group = [platform_sprites1]
+            level = 2
             print('bbbbbbbbbbbb')
         elif board2 + 200 <= main_hero.rect.x - null_object.rect.x <= board3 - 200 and len(main_hero.platform_sprite_group) == 2:
-            main_hero.platform_sprite_group = main_hero.platform_sprite_group[1:]
-            print('bbbbbbbbbbbb')
-
+            main_hero.platform_sprite_group = [platform_sprites2]
+            level = 3
+            print('bbbbbbbbbibbb')
+        print(level, active_sprites)
         # фон (на else можно поменять фон меню)
         if active_sprites == all_sprites:
             screen.blit(BackGround.image, BackGround.rect)
