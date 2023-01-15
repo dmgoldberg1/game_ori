@@ -153,7 +153,7 @@ class Label(pygame.sprite.Sprite):
 
 
 # загрузка уровней
-def load_level(filename):
+def load_level(filename, count):
     filename = "data/" + filename
     # читаем уровень, убирая символы перевода строки
     with open(filename, 'r') as mapFile:
@@ -163,28 +163,64 @@ def load_level(filename):
     max_width = max(map(len, level_map))
 
     # дополняем каждую строку пустыми клетками ('.')
-    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
+    c = list(map(lambda x: x.ljust(max_width, '.'), level_map))
+    return c, len(c[0])
+
 
 
 # прорисовка уровней
-def generate_level(level):
+def generate_level(l, number):
+    level, count = l
     x, y = None, None
-    for y in range(len(level)):
-        for x in range(len(level[y])):
-            if level[y][x] == '.':
-                continue
-            elif level[y][x] == '-':
-                Platform(all_sprites, platform_sprites, (x, y))
-            elif level[y][x] == '(':
-                PlatformSlippery(all_sprites, platform_sprites, (x, y))
-            elif level[y][x] == '/':
-                PlatformFire(all_sprites, platform_sprites, (x, y))
-            elif level[y][x] == '_':
-                a = Platform(all_sprites, platform_sprites, (x, y))
-                print((a.rect.x, a.rect.y))
-                enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
-            elif level[y][x] == '@':
-                Null_Object(all_sprites)
+    if number == 0:
+        for y in range(len(level)):
+            for x in range(len(level[y])):
+                if level[y][x] == '.':
+                    continue
+                elif level[y][x] == '-':
+                    Platform(all_sprites, platform_sprites, (x, y))
+                elif level[y][x] == '(':
+                    PlatformSlippery(all_sprites, platform_sprites, (x, y))
+                elif level[y][x] == '/':
+                    PlatformFire(all_sprites, platform_sprites, (x, y))
+                elif level[y][x] == '_':
+                    a = Platform(all_sprites, platform_sprites, (x, y))
+                    print((a.rect.x, a.rect.y))
+                    enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
+    elif number == 1:
+        for y in range(len(level)):
+            for x in range(len(level[y])):
+                x_1 = x + count
+                if level[y][x] == '.':
+                    continue
+                elif level[y][x] == '-':
+                    Platform(all_sprites, platform_sprites1, (x_1, y))
+                elif level[y][x] == '(':
+                    PlatformSlippery(all_sprites, platform_sprites1, (x_1, y))
+                elif level[y][x] == '/':
+                    PlatformFire(all_sprites, platform_sprites1, (x_1, y))
+                elif level[y][x] == '_':
+                    a = Platform(all_sprites, platform_sprites1, (x_1, y))
+                    print((a.rect.x, a.rect.y))
+                    enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites1, a, main_hero)
+    elif number == 2:
+        count *= 2
+        for y in range(len(level)):
+            for x in range(len(level[y])):
+                x_1 = x + count
+                if level[y][x] == '.':
+                    continue
+                elif level[y][x] == '-':
+                    Platform(all_sprites, platform_sprites2, (x_1, y))
+                elif level[y][x] == '(':
+                    PlatformSlippery(all_sprites, platform_sprites2, (x_1, y))
+                elif level[y][x] == '/':
+                    PlatformFire(all_sprites, platform_sprites2, (x_1, y))
+                elif level[y][x] == '_':
+                    a = Platform(all_sprites, platform_sprites2, (x_1, y))
+                    print((a.rect.x, a.rect.y))
+                    enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites2, a, main_hero)
+    return count * 100
 
 
 # расстановка спрайтов
@@ -201,9 +237,12 @@ clock = pygame.time.Clock()
 BackGround = Background('forest.jpg', [0, 0])
 
 # заготовки групп спрайтов
+
 # игра
 all_sprites = pygame.sprite.Group()
 platform_sprites = pygame.sprite.Group()
+platform_sprites1 = pygame.sprite.Group()
+platform_sprites2 = pygame.sprite.Group()
 main_hero_sprite = pygame.sprite.Group()
 enemy_sprites = pygame.sprite.Group()
 
@@ -248,12 +287,18 @@ active_sprites = menu
 # drag = pai.steering.kinematic.Drag(15)
 # герой, уровень
 
-main_hero = MainHero(all_sprites, platform_sprites)
+main_hero = MainHero(all_sprites, [platform_sprites])
+null_object = Null_Object(all_sprites)
 enemy_range_fly = EnemyRangeFly(all_sprites, platform_sprites, (200, 100))
 
 npc = NPC(all_sprites, (500, 100), 'Ты встретил деда!')
 tick = clock.tick(60) / 1000
-generate_level(load_level('map.txt'))
+
+board1 = generate_level(load_level('map.txt', 0), 0)
+board2 = generate_level(load_level('map2.txt', 1), 1) * 2
+board3 = generate_level(load_level('map3.txt', 2), 2) * 2
+print(board1, board2, board3)
+
 npc_visited = False
 
 # камера
@@ -289,6 +334,20 @@ if __name__ == '__main__':
 
         # начало отрисовки нового экрана
         screen.fill((255, 255, 255))
+
+        # обрабатываем границы
+        if board1 - 200 <= main_hero.rect.x - null_object.rect.x <= board1 + 200 and len(main_hero.platform_sprite_group) == 1:
+            main_hero.platform_sprite_group.append(platform_sprites1)
+            print('aaaaaaaaa')
+        elif board2 - 200 <= main_hero.rect.x - null_object.rect.x <= board2 + 200 and len(main_hero.platform_sprite_group) == 2:
+            main_hero.platform_sprite_group.append(platform_sprites2) #.append(platform_sprites2)
+            print('aaaaaaaaa')
+        elif board1 + 200 <= main_hero.rect.x - null_object.rect.x <= board2 - 200 and len(main_hero.platform_sprite_group) == 2:
+            main_hero.platform_sprite_group = [platform_sprites1]
+            print('bbbbbbbbbbbb')
+        elif board2 + 200 <= main_hero.rect.x - null_object.rect.x <= board3 - 200 and len(main_hero.platform_sprite_group) == 2:
+            main_hero.platform_sprite_group = main_hero.platform_sprite_group[1:]
+            print('bbbbbbbbbbbb')
 
         # фон (на else можно поменять фон меню)
         if active_sprites == all_sprites:
