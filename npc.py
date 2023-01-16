@@ -570,3 +570,5 @@ class Boss(pygame.sprite.Sprite):
                     self.main_hero.hp -= 1
 
                 # self.rect.center = self.pos  # Updates
+
+                
