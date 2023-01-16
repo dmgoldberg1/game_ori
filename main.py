@@ -49,7 +49,7 @@ class Button(pygame.sprite.Sprite):
         global active_sprites
         global running
         # реакция на клик
-        if len(args) == 1 and args[0].type == pygame.MOUSEBUTTONDOWN and \
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
 
             # сделал такую проверку на выход из игры
@@ -58,7 +58,7 @@ class Button(pygame.sprite.Sprite):
             else:
                 running = False
 
-        elif len(args) == 1 and args[0].type == pygame.KEYDOWN:
+        elif args and args[0].type == pygame.KEYDOWN:
             if args[0].key == 27:
                 if self.linked_page:
                     active_sprites = self.linked_page
@@ -316,9 +316,6 @@ camera = Camera(WIDTH, HEIGHT, main_hero)
 # симуляция
 ########################################################################################################################
 
-# подготовка
-all_sprites.update(null_object.rect.x, null_object.rect.y)
-
 # запуск симуляции
 if __name__ == '__main__':
     while running:
@@ -351,16 +348,16 @@ if __name__ == '__main__':
         if board1 - 200 <= main_hero.rect.x - null_object.rect.x <= board1 + 200 and len(
                 main_hero.platform_sprite_group) == 1:
             main_hero.platform_sprite_group.append(platform_sprites1)
-            print('aaaaaaaaa')
+            # print('aaaaaaaaa')
         elif board2 - 200 <= main_hero.rect.x - null_object.rect.x <= board2 + 200 and len(main_hero.platform_sprite_group) == 2:
             main_hero.platform_sprite_group.append(platform_sprites2) #.append(platform_sprites2)
-            print('aaaaaaaaa')
+            # print('aaaaaaaaa')
         elif board1 + 200 <= main_hero.rect.x - null_object.rect.x <= board2 - 200 and len(main_hero.platform_sprite_group) == 2:
             main_hero.platform_sprite_group = [platform_sprites1]
-            print('bbbbbbbbbbbb')
+            # print('bbbbbbbbbbbb')
         elif board2 + 200 <= main_hero.rect.x - null_object.rect.x <= board3 - 200 and len(main_hero.platform_sprite_group) == 2:
             main_hero.platform_sprite_group = main_hero.platform_sprite_group[1:]
-            print('bbbbbbbbbbbb')
+            # print('bbbbbbbbbbbb')
 
         # фон (на else можно поменять фон меню)
         if active_sprites == all_sprites:
@@ -480,11 +477,9 @@ if __name__ == '__main__':
     cur = con.cursor()
 
     result = cur.execute("""UPDATE saved_coordinates SET x = ? WHERE tag = ?""",
-                         (main_hero.rect.x - null_object.rect.x, 'герой')).fetchall()
+                         (main_hero.rect.x, 'герой')).fetchall()
     result = cur.execute("""UPDATE saved_coordinates SET y = ? WHERE tag = ?""",
-                         (main_hero.rect.y - null_object.rect.y, 'герой')).fetchall()
-
-    print(main_hero.rect.x - null_object.rect.x, main_hero.rect.y - null_object.rect.y)
+                         (main_hero.rect.y, 'герой')).fetchall()
 
     con.commit()
     con.close()
