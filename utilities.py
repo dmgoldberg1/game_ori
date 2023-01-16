@@ -48,3 +48,5 @@ def move_to_the_point(obj, db_tag):
 
     obj.rect = obj.rect.move(*result[0])
     print(obj.rect)
+
+    
