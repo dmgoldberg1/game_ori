@@ -96,7 +96,7 @@ class EnemyMelee(pygame.sprite.Sprite):
                             # print('qqqqqqqqqqqqqqqqqqqq')
                     else:
                         self.vel.y += self.gravity
-                    print(self.vel.y)
+                    # print(self.vel.y)
                     self.rect.y += self.vel.y
                     self.rect.x += self.vel.x
                 # print(self.state['на земле'], self.rect.y)
@@ -149,7 +149,7 @@ class EnemyMelee(pygame.sprite.Sprite):
                 self.last_position = self.position
 
                 if pygame.sprite.collide_mask(self, self.main_hero):
-                    print('aaaaaaa')
+                    # print('aaaaaaa')
                     self.main_hero.hp -= 1
 
                 # self.rect.center = self.pos  # Updates
@@ -363,7 +363,7 @@ class Bullet(pygame.sprite.Sprite):
             collide_top_right = platform_rect.clipline(top_hero_line_right)
 
             if collide_down_right:
-                print('d_r')
+                # print('d_r')
                 if self.state['на земле']:
                     pass
                     # self.kill()
@@ -378,7 +378,7 @@ class Bullet(pygame.sprite.Sprite):
 
             # обработка пересечения с низом - левом персонажа
             if collide_down_left:
-                print('d_l')
+                # print('d_l')
                 if self.state['на земле']:
                     pass
                     # self.kill()
@@ -393,7 +393,7 @@ class Bullet(pygame.sprite.Sprite):
 
             # обработка пересечения с верхом - правом персонажа
             if collide_top_right:
-                print('t_r')
+                # print('t_r')
                 # врезается в потолок, стоя на земле
                 if self.state['на земле']:
                     # print(collide_top_right)
@@ -414,7 +414,7 @@ class Bullet(pygame.sprite.Sprite):
 
             # обработка пересечения с верхом - левом персонажа
             if collide_top_left:
-                print('t_l')
+                # print('t_l')
                 # врезается в потолок, стоя на земле
                 if self.state['на земле']:
                     # print(collide_top_left)
@@ -425,7 +425,7 @@ class Bullet(pygame.sprite.Sprite):
                                                (y - self.rect.y))
                 # врезается в потолок, в воздухе
                 elif not platform_rect.collidepoint(self.last_position.left, self.last_position.top):
-                    print(collide_top_left)
+                    # print(collide_top_left)
                     self.state['на земле'] = False
                     # dddself.kill()
                     x = max(collide_top_left[0][0], collide_top_left[-1][0])
@@ -450,7 +450,7 @@ class Boss(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = platform.rect.x, platform.rect.y - self.rect.h
         self.mask = pygame.mask.from_surface(self.image)
-        print('ПЛАТФОРМА', platform.rect.topleft)
+        # print('ПЛАТФОРМА', platform.rect.topleft)
 
         # константы
         self.pause = False
@@ -493,7 +493,7 @@ class Boss(pygame.sprite.Sprite):
                 # elif self.platform.rect.x + self.platform.rect.w - 10 <= self.position.x <= self.platform.rect.x + self.platform.rect.w:
                 #     self.direction = 1
                 #     self.rect.x += self.vel.x
-                print('BOSS pos', self.position.x)
+                # print('BOSS pos', self.position.x)
 
                 if s < 500:
                     if round(self.main_hero_pos.x + self.main_hero_pos.w // 2) == round(self.position.x):
@@ -511,7 +511,7 @@ class Boss(pygame.sprite.Sprite):
                             # print('qqqqqqqqqqqqqqqqqqqq')
                     else:
                         self.vel.y += self.gravity
-                    print(self.vel.y)
+                    # print(self.vel.y)
                     if self.position.x < 650:
                         self.rect.x = 670
                     self.rect.y += self.vel.y
@@ -566,7 +566,7 @@ class Boss(pygame.sprite.Sprite):
                 self.last_position = self.position
 
                 if pygame.sprite.collide_mask(self, self.main_hero):
-                    print('aaaaaaa')
+                    # print('aaaaaaa')
                     self.main_hero.hp -= 1
 
                 # self.rect.center = self.pos  # Updates

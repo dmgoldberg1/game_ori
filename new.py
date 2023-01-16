@@ -1,6 +1,8 @@
-import pygame
 import os
 import sqlite3
+
+import pygame
+
 from data import timer_npc
 from utilities import load_image, move_to_the_point
 
@@ -153,17 +155,46 @@ class MainHero(pygame.sprite.Sprite):
                                           (self.last_position.left, self.last_position.top))
                     top_hero_line_right = ((self.position.right, self.position.top),
                                            (self.last_position.right, self.last_position.top))
+                    center_hero_line_left = ((self.position.left, self.position.centery),
+                                             (self.last_position.left, self.last_position.centery))
+                    center_hero_line_right = ((self.position.right, self.position.centery),
+                                              (self.last_position.right, self.last_position.centery))
 
                     # поиск пересечения персонажем по 4 углам
                     collide_down_left = platform_rect.clipline(down_hero_line_left)
                     collide_down_right = platform_rect.clipline(down_hero_line_right)
                     collide_top_left = platform_rect.clipline(top_hero_line_left)
                     collide_top_right = platform_rect.clipline(top_hero_line_right)
+                    collide_center_left = platform_rect.clipline(center_hero_line_left)
+                    collide_center_right = platform_rect.clipline(center_hero_line_right)
 
                     # print(collide, line11, platform_rect)
-                    if any([collide_down_right, collide_down_left, collide_top_right, collide_top_left]):
+                    if any([collide_down_right, collide_down_left, collide_top_right, collide_top_left,
+                            collide_center_left, collide_center_right]):
                         self.in_air = False
+                        if collide_center_left:
+                            print('c_l')
+                            print(collide_center_left)
+                            x = max(collide_center_left[0][0], collide_center_left[-1][0])
+                            if x == collide_center_left[0][0]:
+                                y = collide_center_left[0][1]
+                            else:
+                                y = collide_center_left[-1][1]
+                            if not platform_rect.collidepoint(self.last_position.left, self.last_position.centery):
+                                self.rect = self.rect.move(x - self.rect.x, (y - self.rect.y - self.rect.height // 2))
 
+                        # обработка пересечения с центром - правом персонажа
+                        if collide_center_right:
+                            print('c_r')
+                            print(collide_center_right)
+                            x = min(collide_center_right[0][0], collide_center_right[-1][0])
+                            if x == collide_center_right[0][0]:
+                                y = collide_center_right[0][1]
+                            else:
+                                y = collide_center_right[-1][1]
+                            if not platform_rect.collidepoint(self.last_position.right, self.last_position.centery):
+                                self.rect = self.rect.move(x - self.rect.x - self.rect.width,
+                                                       (y - self.rect.y - self.rect.height // 2))
                         # обработка пересечения с низом - правом персонажа
                         if collide_down_right:
                             print('d_r')
@@ -254,12 +285,10 @@ class MainHero(pygame.sprite.Sprite):
                 MainHero(self.group, self.platform_sprite_group)
                 self.hp = 10
 
-
             # запоминаем старую позицию
             self.last_position = self.position
 
             #############################################
-
 
 
 # добавление героя в спрайты

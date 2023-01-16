@@ -13,7 +13,7 @@ from npc import NPC, EnemyMelee, EnemyRangeFly, Bullet, Boss
 from nullobject import Null_Object
 # import pygame_ai as pai
 # классы-работники
-from platform import Platform, PlatformSlippery, PlatformFire
+from platform import Platform, PlatformSlippery, PlatformFire, PlatformVertical
 from utilities import Background, sprite_distance
 
 
@@ -184,12 +184,14 @@ def generate_level(l, number):
                     PlatformFire(all_sprites, platform_sprites, (x, y))
                 elif level[y][x] == '_':
                     a = Platform(all_sprites, platform_sprites, (x, y))
-                    print((a.rect.x, a.rect.y))
+                    # print((a.rect.x, a.rect.y))
                     enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
                 elif level[y][x] == '^':
                     a = Platform(all_sprites, platform_sprites, (x, y))
-                    print((a.rect.x, a.rect.y))
+                    # print((a.rect.x, a.rect.y))
                     boss = Boss(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
+                elif level[y][x] == '|':
+                    a = PlatformVertical(all_sprites, platform_sprites, (x, y))
     elif number == 1:
         for y in range(len(level)):
             for x in range(len(level[y])):
@@ -204,7 +206,7 @@ def generate_level(l, number):
                     PlatformFire(all_sprites, platform_sprites1, (x_1, y))
                 elif level[y][x] == '_':
                     a = Platform(all_sprites, platform_sprites1, (x_1, y))
-                    print((a.rect.x, a.rect.y))
+                    # print((a.rect.x, a.rect.y))
                     enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites1, a, main_hero)
     elif number == 2:
         count *= 2
@@ -221,7 +223,7 @@ def generate_level(l, number):
                     PlatformFire(all_sprites, platform_sprites2, (x_1, y))
                 elif level[y][x] == '_':
                     a = Platform(all_sprites, platform_sprites2, (x_1, y))
-                    print((a.rect.x, a.rect.y))
+                    # print((a.rect.x, a.rect.y))
                     enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites2, a, main_hero)
     return count * 100
 
@@ -346,16 +348,16 @@ if __name__ == '__main__':
         if board1 - 200 <= main_hero.rect.x - null_object.rect.x <= board1 + 200 and len(
                 main_hero.platform_sprite_group) == 1:
             main_hero.platform_sprite_group.append(platform_sprites1)
-            print('aaaaaaaaa')
+            # print('aaaaaaaaa')
         elif board2 - 200 <= main_hero.rect.x - null_object.rect.x <= board2 + 200 and len(main_hero.platform_sprite_group) == 2:
             main_hero.platform_sprite_group.append(platform_sprites2) #.append(platform_sprites2)
-            print('aaaaaaaaa')
+            # print('aaaaaaaaa')
         elif board1 + 200 <= main_hero.rect.x - null_object.rect.x <= board2 - 200 and len(main_hero.platform_sprite_group) == 2:
             main_hero.platform_sprite_group = [platform_sprites1]
-            print('bbbbbbbbbbbb')
+            # print('bbbbbbbbbbbb')
         elif board2 + 200 <= main_hero.rect.x - null_object.rect.x <= board3 - 200 and len(main_hero.platform_sprite_group) == 2:
             main_hero.platform_sprite_group = main_hero.platform_sprite_group[1:]
-            print('bbbbbbbbbbbb')
+            # print('bbbbbbbbbbbb')
 
         # фон (на else можно поменять фон меню)
         if active_sprites == all_sprites:
@@ -389,7 +391,7 @@ if __name__ == '__main__':
         for enemy in enemy_sprites:
             if type(enemy) == Boss:
                 if fire_boss and sprite_distance(main_hero.rect, enemy.rect, 100):
-                    print('amogiSSS')
+                    # print('amogiSSS')
                     bullet = Bullet(enemy.rect.x, enemy.rect.y, main_hero.position.x,
                                     main_hero.position.y,
                                     all_sprites, platform_sprites)
@@ -451,7 +453,7 @@ if __name__ == '__main__':
             fire = True
             fire_boss = True
             bullet.fire_timer = 0
-        print(main_hero.hp)
+        # print(main_hero.hp)
         active_sprites.update()
 
         # если экран игры
