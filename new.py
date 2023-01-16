@@ -1,8 +1,6 @@
+import pygame
 import os
 import sqlite3
-
-import pygame
-
 from data import timer_npc
 from utilities import load_image, move_to_the_point
 
@@ -82,15 +80,32 @@ class MainHero(pygame.sprite.Sprite):
         return result[0][0]
 
     def update(self, *args):
-        # обновление биндов во время работы игры
-        if not self.lr_buttons != {self.get_from_db('Влево'): -8,
+        if not self.allow and len(args) == 2:
+            con = sqlite3.connect(os.path.join('data', 'storage.db'))
+            cur = con.cursor()
+            result = cur.execute("""SELECT x, y FROM saved_coordinates WHERE tag = ?""", ('герой',)).fetchall()[0]
+            con.close()
+            print(self.rect.x)
+            print(result[0])
+            print(-(self.rect.x - result[0]))
+            print()
+            print(self.rect.y)
+            print(result[1])
+            print(-(self.rect.y - result[1] + 20))
+            self.rect = self.rect.move(-(self.rect.x - result[0]),
+                                       -(self.rect.y - result[1] + 20))
+            self.allow = True
+
+        elif self.allow:
+            # обновление биндов во время работы игры
+            if not self.lr_buttons != {self.get_from_db('Влево'): -8,
+                                       self.get_from_db('Вправо'): 8,
+                                       1073741904: -8,
+                                       1073741903: 8}:
+                self.lr_buttons = {self.get_from_db('Влево'): -8,
                                    self.get_from_db('Вправо'): 8,
                                    1073741904: -8,
-                                   1073741903: 8}:
-            self.lr_buttons = {self.get_from_db('Влево'): -8,
-                               self.get_from_db('Вправо'): 8,
-                               1073741904: -8,
-                               1073741903: 8}
+                                   1073741903: 8}
 
         if self.ud_buttons != [self.get_from_db('Прыжок'), 1073741906]:
             self.ud_buttons = [self.get_from_db('Прыжок'), 1073741906]
@@ -285,10 +300,12 @@ class MainHero(pygame.sprite.Sprite):
                 MainHero(self.group, self.platform_sprite_group)
                 self.hp = 10
 
+
             # запоминаем старую позицию
             self.last_position = self.position
 
             #############################################
+
 
 
 # добавление героя в спрайты
