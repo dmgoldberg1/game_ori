@@ -45,6 +45,7 @@ class MainHero(pygame.sprite.Sprite):
         self.allow = False
 
         # игровые моменты
+        self.allow = False
         self.platform_type = None
         self.platform = None
         self.hp = 10
@@ -97,8 +98,52 @@ class MainHero(pygame.sprite.Sprite):
         if self.ud_buttons != [self.get_from_db('Прыжок'), 1073741906]:
             self.ud_buttons = [self.get_from_db('Прыжок'), 1073741906]
 
+        # прогрузка позиции
+        if len(args) == 2:
+            # убираем скорости
+            if self.x_vel or self.y_vel:
+                self.x_vel = 0
+                self.y_vel = 0
+
+            # достаём абсолютные координаты из БД
+            con = sqlite3.connect(os.path.join('data', 'storage.db'))
+            cur = con.cursor()
+            result = cur.execute("""SELECT x, y FROM saved_coordinates WHERE tag = ?""",
+                                 ('герой',)).fetchall()[0]
+            con.close()
+
+            # расчёт нужного движения
+            # для x'а
+            if self.rect.x - args[0] < result[0]:
+                move_x = 1
+            elif self.rect.x - args[0] > result[0]:
+                move_x = -1
+            else:
+                move_x = 0
+            move_x *= 10 if (result[0] - (self.rect.x - args[0])) % 10 == 0 else 1
+            move_x *= 10 if (result[0] - (self.rect.x - args[0])) % 100 == 0 else 1
+            move_x *= 10 if (result[0] - (self.rect.x - args[0])) % 1000 == 0 else 1
+
+            # для y'а
+            if self.rect.y - args[1] < result[1]:
+                move_y = 1
+            elif self.rect.y - args[1] > result[1]:
+                move_y = -1
+            else:
+                move_y = 0
+            move_y *= 10 if (result[1] - (self.rect.y - args[1])) % 10 == 0 else 1
+            move_y *= 10 if (result[1] - (self.rect.y - args[1])) % 100 == 0 else 1
+            move_y *= 10 if (result[1] - (self.rect.y - args[1])) % 1000 == 0 else 1
+
+            # if для остановки на месте назаначения
+            if not move_x and not move_y:
+                self.allow = True
+
+            # само движение
+            self.rect = self.rect.move(move_x, move_y)
+
         # обработка событий
-        if args:
+        elif self.allow and args:
             if args[0].type == pygame.KEYDOWN and timer_npc[0]:
                 self.continue_moving_x = True
 
@@ -114,6 +159,8 @@ class MainHero(pygame.sprite.Sprite):
             if args[0].type == pygame.KEYUP and args[0].key in self.lr_buttons:
                 self.continue_moving_x = False
                 self.button_lr_pressed = False
+
+        # движение исходящее из события
         else:
             # обработка платформы
             if self.platform_type == 'slippery':
@@ -282,9 +329,9 @@ class MainHero(pygame.sprite.Sprite):
                 self.state['на земле'] = False
 
             # упал - умер - возродился
-            if self.rect.y > HEIGHT:  # HEIGHT - берется из файла mainhero.py or self.hp == 0
-                self.kill()
-                MainHero(self.group, self.platform_sprite_group)
+            # теперь: набрал большую скорость - умер - возродился
+            if self.y_vel > 100:
+                self.allow = False
                 self.hp = 10
 
             # запоминаем старую позицию
@@ -317,3 +364,4 @@ if __name__ == '__main__':
         pygame.display.flip()
 
     pygame.quit()
+
