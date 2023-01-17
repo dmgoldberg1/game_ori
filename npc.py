@@ -14,7 +14,7 @@ WIDTH, HEIGHT = 1000, 600
 class NPC(pygame.sprite.Sprite):
     image = load_image("animation/npc.jpg", colorkey=(255, 255, 255))
     # print(image.get_rect())
-    image = pygame.transform.scale(image, (151 // 2, 186 // 2))
+    image = pygame.transform.scale(image, (90, 90))
 
     def __init__(self, group, coords, text):
         super().__init__(group)

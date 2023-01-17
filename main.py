@@ -192,6 +192,7 @@ def load_level(filename, count):
 
 # прорисовка уровней
 def generate_level(l, number):
+    global npc_ded
     level, count = l
     x, y = None, None
     if number == 0:
@@ -209,6 +210,10 @@ def generate_level(l, number):
                     a = Platform(all_sprites, platform_sprites, (x, y))
                     print((a.rect.x, a.rect.y))
                     enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
+                elif level[y][x] == '$':
+                    a = Platform(all_sprites, platform_sprites, (x, y))
+                    print((a.rect.x, a.rect.y))
+                    npc_ded = NPC(all_sprites, (a.rect.x + 10, a.rect.y  - 40), 'Ты встретил деда!')
     elif number == 1:
         for y in range(len(level)):
             for x in range(len(level[y])):
@@ -310,13 +315,13 @@ active_sprites = menu
 # drag = pai.steering.kinematic.Drag(15)
 # герой, уровень
 
-main_hero = MainHero(all_sprites, [platform_sprites], screen)
 null_object = Null_Object(all_sprites)
 enemy_range_fly = EnemyRangeFly(all_sprites, platform_sprites, (200, 100))
 load_cover = LoadCover(all_sprites)
+main_hero = MainHero(all_sprites, [platform_sprites], null_object)
 all_sprites.remove(load_cover)
 
-npc = NPC(all_sprites, (2300, 100), 'Ты встретил деда!')
+# npc = NPC(all_sprites, (2300, 100), 'Ты встретил деда!')
 tick = clock.tick(60) / 1000
 
 board1 = generate_level(load_level('map.txt', 0), 0)
@@ -383,28 +388,28 @@ if __name__ == '__main__':
         else:
             pass
 
-        if sprite_distance(npc.rect, main_hero.rect, 130) and not npc.npc_visited and main_hero.allow:
+        if sprite_distance(npc_ded.rect, main_hero.rect, 130) and not npc_ded.npc_visited and main_hero.allow:
             # print('amogus')
             starttime = pygame.time.get_ticks()
             timer_npc[0] = False
 
-            npc.npc_visited = True
-            npc.npc_visit = True
-            npc.npc_time_visit = pygame.time.get_ticks()
+            npc_ded.npc_visited = True
+            npc_ded.npc_visit = True
+            npc_ded.npc_time_visit = pygame.time.get_ticks()
             amogus = 1
 
         # если время встречи пошло
-        if npc.npc_time_visit:
+        if npc_ded.npc_time_visit:
 
             # если время посещения превосходит 5 сек
-            if pygame.time.get_ticks() - npc.npc_time_visit >= 5000:
-                npc.npc_visit = False
-                npc.npc_time_visit = 0
+            if pygame.time.get_ticks() - npc_ded.npc_time_visit >= 5000:
+                npc_ded.npc_visit = False
+                npc_ded.npc_time_visit = 0
                 timer_npc[0] = True
 
             # если персонаж сейчас посещает нпс
-            if npc.npc_visit:
-                screen.blit(npc.text_surface, (430, 50))
+            if npc_ded.npc_visit:
+                screen.blit(npc_ded.text_surface, (430, 50))
 
         # работа с координатами
         if not main_hero.allow and active_sprites == all_sprites:
