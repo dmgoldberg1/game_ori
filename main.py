@@ -8,12 +8,12 @@ import pygame
 # import pygame_ai as pai
 from camera import Camera
 from data import timer_npc
-from new import MainHero
-from npc import NPC, EnemyMelee, EnemyRangeFly
+from mainhero import MainHero
+from npc import NPC, EnemyMelee, EnemyRangeFly, Bullet, Boss
 from nullobject import Null_Object
 # import pygame_ai as pai
 # классы-работники
-from platform import Platform, PlatformSlippery, PlatformFire
+from platform import Platform, PlatformSlippery, PlatformFire, PlatformVertical
 from utilities import Background, sprite_distance
 
 
@@ -152,6 +152,29 @@ class Label(pygame.sprite.Sprite):
         pass
 
 
+class LoadCover(pygame.sprite.Sprite):
+    def __init__(self, group):
+        super().__init__(group)
+
+        self.dots = 0
+        f1 = pygame.font.SysFont('arial', 60)
+        text1 = f1.render('Загрузка...' + ('.' * self.dots), True, pygame.Color("white"))
+
+        self.size = [1000, 600]
+        self.image = pygame.Surface(self.size)
+        self.image.fill((0, 0, 0))
+
+        self.image.blit(text1, (600 - text1.get_width(), 300 - text1.get_height()))
+
+        # координаты
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 0
+
+    def update(self, *args):
+        pass
+
+
 # загрузка уровней
 def load_level(filename, count):
     filename = "data/" + filename
@@ -165,7 +188,6 @@ def load_level(filename, count):
     # дополняем каждую строку пустыми клетками ('.')
     c = list(map(lambda x: x.ljust(max_width, '.'), level_map))
     return c, len(c[0])
-
 
 
 # прорисовка уровней
@@ -186,7 +208,7 @@ def generate_level(l, number):
                 elif level[y][x] == '_':
                     a = Platform(all_sprites, platform_sprites, (x, y))
                     print((a.rect.x, a.rect.y))
-                    enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites, a)
+                    enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
     elif number == 1:
         for y in range(len(level)):
             for x in range(len(level[y])):
@@ -202,7 +224,7 @@ def generate_level(l, number):
                 elif level[y][x] == '_':
                     a = Platform(all_sprites, platform_sprites1, (x_1, y))
                     print((a.rect.x, a.rect.y))
-                    enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites1, a)
+                    enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites1, a, main_hero)
     elif number == 2:
         count *= 2
         for y in range(len(level)):
@@ -219,7 +241,7 @@ def generate_level(l, number):
                 elif level[y][x] == '_':
                     a = Platform(all_sprites, platform_sprites2, (x_1, y))
                     print((a.rect.x, a.rect.y))
-                    enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites2, a)
+                    enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites2, a, main_hero)
     return count * 100
 
 
@@ -288,11 +310,13 @@ active_sprites = menu
 # drag = pai.steering.kinematic.Drag(15)
 # герой, уровень
 
-main_hero = MainHero(all_sprites, [platform_sprites])
+main_hero = MainHero(all_sprites, [platform_sprites], screen)
 null_object = Null_Object(all_sprites)
 enemy_range_fly = EnemyRangeFly(all_sprites, platform_sprites, (200, 100))
+load_cover = LoadCover(all_sprites)
+all_sprites.remove(load_cover)
 
-npc = NPC(all_sprites, (500, 100), 'Ты встретил деда!')
+npc = NPC(all_sprites, (2300, 100), 'Ты встретил деда!')
 tick = clock.tick(60) / 1000
 
 board1 = generate_level(load_level('map.txt', 0), 0)
@@ -301,16 +325,16 @@ board3 = generate_level(load_level('map3.txt', 2), 2) * 2
 print(board1, board2, board3)
 
 npc_visited = False
-
+fire = True
+fire_boss = True
+bullets = []
+bullets_boss = []
+test = True
 # камера
 camera = Camera(WIDTH, HEIGHT, main_hero)
 
 # симуляция
 ########################################################################################################################
-
-# подготовка
-all_sprites.update(null_object.rect.x, null_object.rect.y)
-
 # запуск симуляции
 if __name__ == '__main__':
     while running:
@@ -320,7 +344,7 @@ if __name__ == '__main__':
         # обработка событий - отклик
         for event in pygame.event.get():
             # закрытие окна
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT and load_cover not in all_sprites:
                 running = False
 
             # карта (игра замерзает)
@@ -359,7 +383,7 @@ if __name__ == '__main__':
         else:
             pass
 
-        if sprite_distance(npc.rect, main_hero.rect, 130) and not npc.npc_visited:
+        if sprite_distance(npc.rect, main_hero.rect, 130) and not npc.npc_visited and main_hero.allow:
             # print('amogus')
             starttime = pygame.time.get_ticks()
             timer_npc[0] = False
@@ -382,7 +406,43 @@ if __name__ == '__main__':
             if npc.npc_visit:
                 screen.blit(npc.text_surface, (430, 50))
 
+        # работа с координатами
+        if not main_hero.allow and active_sprites == all_sprites:
+            all_sprites.update(null_object.rect.x, null_object.rect.y)
+
+            # натянуть 'загрузку'
+            if load_cover not in all_sprites:
+                load_cover = LoadCover(all_sprites)
+        else:
+            active_sprites.update()
+
+            # снять 'загрузку'
+            if load_cover in all_sprites:
+                all_sprites.remove(load_cover)
+
         for enemy in enemy_sprites:
+            if type(enemy) == Boss:
+                if fire_boss and sprite_distance(main_hero.rect, enemy.rect, 100):
+                    # print('amogiSSS')
+                    bullet = Bullet(enemy.rect.x, enemy.rect.y, main_hero.position.x,
+                                    main_hero.position.y,
+                                    all_sprites, platform_sprites)
+                    bullets_boss.append(bullet)
+                    bullet.kill()
+                    fire_boss = False
+                    bullet.fire_timer = pygame.time.get_ticks()
+
+                for bullet in bullets_boss[:]:
+                    bullet.update()
+                    if 0 <= abs(main_hero.rect.x - int(bullet.pos[0] // 1)) <= 15 and 0 <= abs(
+                            main_hero.rect.y - int(bullet.pos[1] // 1)) <= 15:
+                        main_hero.hp -= 1
+                    if not screen.get_rect().collidepoint(bullet.pos):
+                        bullets_boss.remove(bullet)
+                    # print(f'''Герой: {main_hero.rect.x}, Пуля: {int(bullet.pos[0] // 1)}''')
+
+                for bullet in bullets_boss:
+                    bullet.draw(screen)
             if sprite_distance(main_hero.rect, enemy.rect, 80) and not main_hero.hit:
                 main_hero.hp -= 1
                 main_hero.hit = True
@@ -392,6 +452,38 @@ if __name__ == '__main__':
                     main_hero.hit = False
                     main_hero.hit_timer = 0
             # print(sprite_distance(main_hero.rect, enemy.rect, 80))
+            # print(main_hero.hp)
+
+            # Стрельба летающих нпс
+
+        if fire and sprite_distance(main_hero.rect, enemy_range_fly.rect, 500):
+            bullet = Bullet(enemy_range_fly.rect.x, enemy_range_fly.rect.y, main_hero.position.x, main_hero.position.y,
+                            all_sprites, platform_sprites)
+            bullets.append(bullet)
+            test = False
+            bullet.kill()
+            fire = False
+            bullet.fire_timer = pygame.time.get_ticks()
+
+        for bullet in bullets[:]:
+            bullet.update()
+            if 0 <= abs(main_hero.rect.x - int(bullet.pos[0] // 1)) <= 15 and 0 <= abs(
+                    main_hero.rect.y - int(bullet.pos[1] // 1)) <= 15:
+                main_hero.hp -= 1
+            if not screen.get_rect().collidepoint(bullet.pos):
+                bullets.remove(bullet)
+            # print(f'''Герой: {main_hero.rect.x}, Пуля: {int(bullet.pos[0] // 1)}''')
+
+        for bullet in bullets:
+            bullet.draw(screen)
+
+            # print(bullets)
+            # print(sprite_distance(main_hero.rect, bullet.rect, 150))
+
+        if not fire and pygame.time.get_ticks() - bullet.fire_timer >= 1000:
+            fire = True
+            fire_boss = True
+            bullet.fire_timer = 0
             # print(main_hero.hp)
         active_sprites.update()
 
@@ -403,7 +495,7 @@ if __name__ == '__main__':
 
             # обновляем положение всех спрайтов
             for sprite in all_sprites:
-                if sprite != button_in_game:
+                if sprite != button_in_game and sprite != load_cover:
                     camera.apply(sprite)
             main_hero.last_position = main_hero.rect
             main_hero.position = main_hero.rect

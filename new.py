@@ -1,8 +1,10 @@
-import pygame
 import os
 import sqlite3
+
+import pygame
+
 from data import timer_npc
-from utilities import load_image
+from utilities import load_image, move_to_the_point
 
 # настройки окна
 size = WIDHT, HEIGHT = 1000, 600
@@ -34,23 +36,26 @@ class MainHero(pygame.sprite.Sprite):
         self.image = MainHero.image
 
         # константы
-        self.allow = False
         self.continue_moving_x = False
         self.hit = False
         self.hit_timer = 0
         self.in_air = True
         self.button_lr_pressed = False
         self.pause = False
+        self.allow = False
 
         # игровые моменты
+        self.allow = False
         self.platform_type = None
         self.platform = None
         self.hp = 10
 
         # расположение на экране
         self.rect = self.image.get_rect()
-        self.rect.x = 150
-        self.rect.y = 200
+        print('wwwww' ,self.rect)
+        self.rect.x = 0
+        self.rect.y = 0
+        move_to_the_point(self, 'герой')
 
         # характеритики
         self.hero_widht = self.image.get_rect()[2]
@@ -80,203 +85,259 @@ class MainHero(pygame.sprite.Sprite):
         return result[0][0]
 
     def update(self, *args):
-        if not self.allow and len(args) == 2:
-            con = sqlite3.connect(os.path.join('data', 'storage.db'))
-            cur = con.cursor()
-            result = cur.execute("""SELECT x, y FROM saved_coordinates WHERE tag = ?""", ('герой',)).fetchall()[0]
-            con.close()
-            print(self.rect.x)
-            print(result[0])
-            print(-(self.rect.x - result[0]))
-            print()
-            print(self.rect.y)
-            print(result[1])
-            print(-(self.rect.y - result[1] + 20))
-            self.rect = self.rect.move(-(self.rect.x - result[0]),
-                                       -(self.rect.y - result[1] + 20))
-            self.allow = True
-
-        elif self.allow:
-            # обновление биндов во время работы игры
-            if not self.lr_buttons != {self.get_from_db('Влево'): -8,
-                                       self.get_from_db('Вправо'): 8,
-                                       1073741904: -8,
-                                       1073741903: 8}:
-                self.lr_buttons = {self.get_from_db('Влево'): -8,
+        # обновление биндов во время работы игры
+        if not self.lr_buttons != {self.get_from_db('Влево'): -8,
                                    self.get_from_db('Вправо'): 8,
                                    1073741904: -8,
-                                   1073741903: 8}
+                                   1073741903: 8}:
+            self.lr_buttons = {self.get_from_db('Влево'): -8,
+                               self.get_from_db('Вправо'): 8,
+                               1073741904: -8,
+                               1073741903: 8}
 
-            if self.ud_buttons != [self.get_from_db('Прыжок'), 1073741906]:
-                self.ud_buttons = [self.get_from_db('Прыжок'), 1073741906]
+        if self.ud_buttons != [self.get_from_db('Прыжок'), 1073741906]:
+            self.ud_buttons = [self.get_from_db('Прыжок'), 1073741906]
 
-            # обработка событий
-            if args:
-                if args[0].type == pygame.KEYDOWN and timer_npc[0]:
-                    self.continue_moving_x = True
+        # прогрузка позиции
+        if len(args) == 2:
+            # убираем скорости
+            if self.x_vel or self.y_vel:
+                self.x_vel = 0
+                self.y_vel = 0
 
-                    if self.state['на земле']:
-                        if args[0].key in self.ud_buttons:
-                            self.y_vel = -33
-                            self.state['на земле'] = False
+            # достаём абсолютные координаты из БД
+            con = sqlite3.connect(os.path.join('data', 'storage.db'))
+            cur = con.cursor()
+            result = cur.execute("""SELECT x, y FROM saved_coordinates WHERE tag = ?""",
+                                 ('герой',)).fetchall()[0]
+            con.close()
 
-                    if args[0].key in self.lr_buttons:
-                        self.x_vel = self.lr_buttons[args[0].key]
-                        self.button_lr_pressed = True
-
-                if args[0].type == pygame.KEYUP and args[0].key in self.lr_buttons:
-                    self.continue_moving_x = False
-                    self.button_lr_pressed = False
+            # расчёт нужного движения
+            # для x'а
+            if self.rect.x - args[0] < result[0]:
+                move_x = 1
+            elif self.rect.x - args[0] > result[0]:
+                move_x = -1
             else:
-                # обработка платформы
-                if self.platform_type == 'slippery':
-                    self.continue_moving_x = True
-                else:
-                    if not self.button_lr_pressed:
-                        self.continue_moving_x = False
+                move_x = 0
+            move_x *= 10 if (result[0] - (self.rect.x - args[0])) % 10 == 0 else 1
+            move_x *= 10 if (result[0] - (self.rect.x - args[0])) % 100 == 0 else 1
+            move_x *= 10 if (result[0] - (self.rect.x - args[0])) % 1000 == 0 else 1
 
-                        # обработка статуса положения
-                if not self.state['на земле']:
-                    self.y_vel += 2
-                else:
-                    self.y_vel = 0
-                    if not self.continue_moving_x:
-                        if 1 > abs(self.x_vel) > 0:
-                            self.x_vel -= 2 * (self.x_vel / abs(self.x_vel))
-                        else:
-                            self.x_vel = 0
+            # для y'а
+            if self.rect.y - args[1] < result[1]:
+                move_y = 1
+            elif self.rect.y - args[1] > result[1]:
+                move_y = -1
+            else:
+                move_y = 0
+            move_y *= 10 if (result[1] - (self.rect.y - args[1])) % 10 == 0 else 1
+            move_y *= 10 if (result[1] - (self.rect.y - args[1])) % 100 == 0 else 1
+            move_y *= 10 if (result[1] - (self.rect.y - args[1])) % 1000 == 0 else 1
 
-                # подготовка к обработке пересечений
-                self.rect = self.rect.move(self.x_vel, self.y_vel)
-                self.position = pygame.Rect(self.rect)
-                self.in_air = True
+            # if для остановки на месте назаначения
+            if not move_x and not move_y:
+                self.allow = True
 
-                # обработка пересечений - цикл по пересечению с платформами
-                print(self.platform_sprite_group)
-                for platforms in self.platform_sprite_group:
-                    for i in platforms:
-                        # print(i.mask.get_bounding_rects()[0])
-                        a, b, c, d = i.mask.get_bounding_rects()[0][:4]
-                        platform = i
-                        platform_rect = pygame.Rect(i.rect[0] + a, i.rect[1] + b + 5, c, d)
+            # само движение
+            self.rect = self.rect.move(move_x, move_y)
 
-                        # линия пересечения персонажа по 4 направлениям
-                        down_hero_line_left = ((self.position.left, self.position.bottom),
-                                               (self.last_position.left, self.last_position.bottom))
-                        down_hero_line_right = ((self.position.right, self.position.bottom),
-                                                (self.last_position.right, self.last_position.bottom))
-                        top_hero_line_left = ((self.position.left, self.position.top),
-                                              (self.last_position.left, self.last_position.top))
-                        top_hero_line_right = ((self.position.right, self.position.top),
-                                               (self.last_position.right, self.last_position.top))
+        # обработка событий
+        elif self.allow and args:
+            if args[0].type == pygame.KEYDOWN and timer_npc[0]:
+                self.continue_moving_x = True
 
-                        # поиск пересечения персонажем по 4 углам
-                        collide_down_left = platform_rect.clipline(down_hero_line_left)
-                        collide_down_right = platform_rect.clipline(down_hero_line_right)
-                        collide_top_left = platform_rect.clipline(top_hero_line_left)
-                        collide_top_right = platform_rect.clipline(top_hero_line_right)
+                if self.state['на земле']:
+                    if args[0].key in self.ud_buttons:
+                        self.y_vel = -33
+                        self.state['на земле'] = False
 
-                        # print(collide, line11, platform_rect)
-                        if any([collide_down_right, collide_down_left, collide_top_right, collide_top_left]):
-                            self.in_air = False
+                if args[0].key in self.lr_buttons:
+                    self.x_vel = self.lr_buttons[args[0].key]
+                    self.button_lr_pressed = True
 
-                            # обработка пересечения с низом - правом персонажа
-                            if collide_down_right:
-                                # print('d_r')
-                                if self.state['на земле']:
-                                    self.y_vel = 0
-                                if not platform_rect.collidepoint(self.last_position.right, self.last_position.bottom):
-                                    # print(collide_down_right)
-                                    self.y_vel = 0
-                                    self.state['на земле'] = True
-                                    x = max(collide_down_right[0][0], collide_down_right[-1][0])
-                                    y = min(collide_down_right[0][1], collide_down_right[-1][1])
-                                    self.rect = self.rect.move(x - self.rect.x - self.rect.width,
-                                                               (y - self.rect.height - self.rect.y))
+            if args[0].type == pygame.KEYUP and args[0].key in self.lr_buttons:
+                self.continue_moving_x = False
+                self.button_lr_pressed = False
 
-                            # обработка пересечения с низом - левом персонажа
-                            if collide_down_left:
-                                # print('d_l')
-                                if self.state['на земле']:
-                                    self.y_vel = 0
-                                if not platform_rect.collidepoint(self.last_position.left, self.last_position.bottom):
-                                    # print(collide_down_left)
-                                    self.y_vel = 0
-                                    self.state['на земле'] = True
-                                    x = min(collide_down_left[0][0], collide_down_left[-1][0])
-                                    y = min(collide_down_left[0][1], collide_down_left[-1][1])
-                                    self.rect = self.rect.move(x - self.rect.x,
-                                                               (y - self.rect.height - self.rect.y))
+        # движение исходящее из события
+        else:
+            # обработка платформы
+            if self.platform_type == 'slippery':
+                self.continue_moving_x = True
+            else:
+                if not self.button_lr_pressed:
+                    self.continue_moving_x = False
 
-                            # обработка пересечения с верхом - правом персонажа
-                            if collide_top_right:
-                                # print('t_r')
-                                # врезается в потолок, стоя на земле
-                                if self.state['на земле']:
-                                    # print(collide_top_right)
-                                    self.y_vel = 0
-                                    x = min(collide_top_right[0][0], collide_top_right[-1][0])
-                                    y = max(collide_top_right[0][1], collide_top_right[-1][1])
-                                    self.rect = self.rect.move(x - self.rect.x - self.rect.width - 1,
-                                                               (y - self.rect.y))
-                                # врезается в потолок, в воздухе
-                                elif not platform_rect.collidepoint(self.last_position.right, self.last_position.top):
-                                    # print(collide_top_right)
-                                    self.state['на земле'] = False
-                                    self.y_vel = 0
-                                    x = min(collide_top_right[0][0], collide_top_right[-1][0])
-                                    y = max(collide_top_right[0][1], collide_top_right[-1][1])
-                                    self.rect = self.rect.move(x - self.rect.x - self.rect.width,
-                                                               (y - self.rect.y + 1))
+                    # обработка статуса положения
+            if not self.state['на земле']:
+                self.y_vel += 2
+            else:
+                self.y_vel = 0
+                if not self.continue_moving_x:
+                    if 1 > abs(self.x_vel) > 0:
+                        self.x_vel -= 2 * (self.x_vel / abs(self.x_vel))
+                    else:
+                        self.x_vel = 0
 
-                            # обработка пересечения с верхом - левом персонажа
-                            if collide_top_left:
-                                # print('t_l')
-                                # врезается в потолок, стоя на земле
-                                if self.state['на земле']:
-                                    # print(collide_top_left)
-                                    self.y_vel = 0
-                                    x = max(collide_top_left[0][0], collide_top_left[-1][0])
-                                    y = max(collide_top_left[0][1], collide_top_left[-1][1])
-                                    self.rect = self.rect.move(x - self.rect.x + 1,
-                                                               (y - self.rect.y))
-                                # врезается в потолок, в воздухе
-                                elif not platform_rect.collidepoint(self.last_position.left, self.last_position.top):
-                                    # print(collide_top_left)
-                                    self.state['на земле'] = False
-                                    self.y_vel = 0
-                                    x = max(collide_top_left[0][0], collide_top_left[-1][0])
-                                    y = max(collide_top_left[0][1], collide_top_left[-1][1])
-                                    self.rect = self.rect.move(x - self.rect.x,
-                                                               (y - self.rect.y + 1))
+            # подготовка к обработке пересечений
+            self.rect = self.rect.move(self.x_vel, self.y_vel)
+            self.position = pygame.Rect(self.rect)
+            self.in_air = True
 
-                            # обновление позиции
-                            self.position = pygame.Rect(self.rect)
+            # обработка пересечений - цикл по пересечению с платформами
+            # print(self.platform_sprite_group)
+            platforms = []
+            for p in self.platform_sprite_group:
+                for i in p:
+                    # print(i.mask.get_bounding_rects()[0])
+                    a, b, c, d = i.mask.get_bounding_rects()[0][:4]
+                    platform = i
+                    platform_rect = pygame.Rect(i.rect[0] + a, i.rect[1] + b + 5, c, d)
 
-                            # обновление статуса
-                            if (platform_rect.collidepoint(self.position.left, self.position.bottom)) or \
-                                    (platform_rect.collidepoint(self.position.right, self.position.bottom)):
-                                self.state['на земле'] = True
-                                self.platform_type = platform.platform_type
-                                self.platform = platform
+                    # линия пересечения персонажа по 4 направлениям
+                    down_hero_line_left = ((self.position.left, self.position.bottom),
+                                           (self.last_position.left, self.last_position.bottom))
+                    down_hero_line_right = ((self.position.right, self.position.bottom),
+                                            (self.last_position.right, self.last_position.bottom))
+                    top_hero_line_left = ((self.position.left, self.position.top),
+                                          (self.last_position.left, self.last_position.top))
+                    top_hero_line_right = ((self.position.right, self.position.top),
+                                           (self.last_position.right, self.last_position.top))
+                    center_hero_line_left = ((self.position.left, self.position.centery),
+                                             (self.last_position.left, self.last_position.centery))
+                    center_hero_line_right = ((self.position.right, self.position.centery),
+                                              (self.last_position.right, self.last_position.centery))
+
+                    # поиск пересечения персонажем по 4 углам
+                    collide_down_left = platform_rect.clipline(down_hero_line_left)
+                    collide_down_right = platform_rect.clipline(down_hero_line_right)
+                    collide_top_left = platform_rect.clipline(top_hero_line_left)
+                    collide_top_right = platform_rect.clipline(top_hero_line_right)
+                    collide_center_left = platform_rect.clipline(center_hero_line_left)
+                    collide_center_right = platform_rect.clipline(center_hero_line_right)
+
+                    # print(collide, line11, platform_rect)
+                    if any([collide_down_right, collide_down_left, collide_top_right, collide_top_left,
+                            collide_center_left, collide_center_right]):
+                        self.in_air = False
+                        if collide_center_left:
+                            print('c_l')
+                            print(collide_center_left)
+                            x = max(collide_center_left[0][0], collide_center_left[-1][0])
+                            if x == collide_center_left[0][0]:
+                                y = collide_center_left[0][1]
                             else:
+                                y = collide_center_left[-1][1]
+                            if not platform_rect.collidepoint(self.last_position.left, self.last_position.centery):
+                                self.rect = self.rect.move(x - self.rect.x, (y - self.rect.y - self.rect.height // 2))
+
+                        # обработка пересечения с центром - правом персонажа
+                        if collide_center_right:
+                            print('c_r')
+                            print(collide_center_right)
+                            x = min(collide_center_right[0][0], collide_center_right[-1][0])
+                            if x == collide_center_right[0][0]:
+                                y = collide_center_right[0][1]
+                            else:
+                                y = collide_center_right[-1][1]
+                            if not platform_rect.collidepoint(self.last_position.right, self.last_position.centery):
+                                self.rect = self.rect.move(x - self.rect.x - self.rect.width,
+                                                       (y - self.rect.y - self.rect.height // 2))
+                        # обработка пересечения с низом - правом персонажа
+                        if collide_down_right:
+                            print('d_r')
+                            if self.state['на земле']:
+                                self.y_vel = 0
+                            if not platform_rect.collidepoint(self.last_position.right, self.last_position.bottom):
+                                print(collide_down_right)
+                                self.y_vel = 0
+                                self.state['на земле'] = True
+                                x = max(collide_down_right[0][0], collide_down_right[-1][0])
+                                y = min(collide_down_right[0][1], collide_down_right[-1][1])
+                                self.rect = self.rect.move(x - self.rect.x - self.rect.width,
+                                                           (y - self.rect.height - self.rect.y))
+
+                        # обработка пересечения с низом - левом персонажа
+                        if collide_down_left:
+                            print('d_l')
+                            if self.state['на земле']:
+                                self.y_vel = 0
+                            if not platform_rect.collidepoint(self.last_position.left, self.last_position.bottom):
+                                print(collide_down_left)
+                                self.y_vel = 0
+                                self.state['на земле'] = True
+                                x = min(collide_down_left[0][0], collide_down_left[-1][0])
+                                y = min(collide_down_left[0][1], collide_down_left[-1][1])
+                                self.rect = self.rect.move(x - self.rect.x,
+                                                           (y - self.rect.height - self.rect.y))
+
+                        # обработка пересечения с верхом - правом персонажа
+                        if collide_top_right:
+                            print('t_r')
+                            # врезается в потолок, стоя на земле
+                            if self.state['на земле']:
+                                print(collide_top_right)
+                                self.y_vel = 0
+                                x = min(collide_top_right[0][0], collide_top_right[-1][0])
+                                y = max(collide_top_right[0][1], collide_top_right[-1][1])
+                                self.rect = self.rect.move(x - self.rect.x - self.rect.width - 1,
+                                                           (y - self.rect.y))
+                            # врезается в потолок, в воздухе
+                            elif not platform_rect.collidepoint(self.last_position.right, self.last_position.top):
+                                print(collide_top_right)
                                 self.state['на земле'] = False
+                                self.y_vel = 0
+                                x = min(collide_top_right[0][0], collide_top_right[-1][0])
+                                y = max(collide_top_right[0][1], collide_top_right[-1][1])
+                                self.rect = self.rect.move(x - self.rect.x - self.rect.width,
+                                                           (y - self.rect.y + 1))
 
-                # если не было пересечений
-                if self.in_air:
-                    self.state['на земле'] = False
+                        # обработка пересечения с верхом - левом персонажа
+                        if collide_top_left:
+                            print('t_l')
+                            # врезается в потолок, стоя на земле
+                            if self.state['на земле']:
+                                print(collide_top_left)
+                                self.y_vel = 0
+                                x = max(collide_top_left[0][0], collide_top_left[-1][0])
+                                y = max(collide_top_left[0][1], collide_top_left[-1][1])
+                                self.rect = self.rect.move(x - self.rect.x + 1,
+                                                           (y - self.rect.y))
+                            # врезается в потолок, в воздухе
+                            elif not platform_rect.collidepoint(self.last_position.left, self.last_position.top):
+                                print(collide_top_left)
+                                self.state['на земле'] = False
+                                self.y_vel = 0
+                                x = max(collide_top_left[0][0], collide_top_left[-1][0])
+                                y = max(collide_top_left[0][1], collide_top_left[-1][1])
+                                self.rect = self.rect.move(x - self.rect.x,
+                                                           (y - self.rect.y + 1))
 
-                # упал - умер - возродился
-                if self.rect.y > HEIGHT:  # HEIGHT - берется из файла mainhero.py or self.hp == 0
-                    self.kill()
-                    MainHero(self.group, self.platform_sprite_group)
-                    self.hp = 10
+                        # обновление позиции
+                        self.position = pygame.Rect(self.rect)
 
-                # запоминаем старую позицию
-                self.last_position = self.position
+                        platforms.append([i, platform_rect.collidepoint(self.position.left, self.position.bottom),
+                                          platform_rect.collidepoint(self.position.right, self.position.bottom)])
+            if any(filter(lambda x: x[1] or x[2], platforms)):
+                self.state['на земле'] = True
+            else:
+                self.state['на земле'] = False
 
-                #############################################
+            # если не было пересечений
+            if self.in_air:
+                self.state['на земле'] = False
 
+            # упал - умер - возродился
+            # теперь: набрал большую скорость - умер - возродился
+            if self.y_vel > 100:
+                self.allow = False
+                self.hp = 10
+
+            # запоминаем старую позицию
+            self.last_position = self.position
+
+            #############################################
 
 
 # добавление героя в спрайты
@@ -303,3 +364,4 @@ if __name__ == '__main__':
         pygame.display.flip()
 
     pygame.quit()
+

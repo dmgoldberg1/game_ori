@@ -12,7 +12,7 @@ WIDTH, HEIGHT = 1000, 600
 
 
 class NPC(pygame.sprite.Sprite):
-    image = load_image("temp.png", colorkey=(255, 255, 255))
+    image = load_image("animation/npc.jpg", colorkey=(255, 255, 255))
     # print(image.get_rect())
     image = pygame.transform.scale(image, (151 // 2, 186 // 2))
 
@@ -34,7 +34,8 @@ class NPC(pygame.sprite.Sprite):
 class EnemyMelee(pygame.sprite.Sprite):
     def __init__(self, group, special_group, platform_sprite_group, platform, main_hero):
         super().__init__(group)
-        self.image = load_image('temp.png')
+        self.image = load_image('animation/enemy_melee.jpg', colorkey=(255, 255, 255))
+        self.image = pygame.transform.scale(self.image, (50, 50))
 
         # создаем прямоугольник - объект
         self.rect = self.image.get_rect()
@@ -75,6 +76,11 @@ class EnemyMelee(pygame.sprite.Sprite):
                 # print(s)
 
                 self.position = pygame.Rect(self.rect)
+                # if self.platform.rect.x <= self.position.x <= self.platform.rect.x + 10:
+                #     self.direction = 0
+                # elif self.platform.rect.x + self.platform.rect.w - 10 <= self.position.x <= self.platform.rect.x + self.platform.rect.w:
+                #     self.direction = 1
+                #     self.rect.x += self.vel.x
 
                 if s < 500:
                     if round(self.main_hero_pos.x + self.main_hero_pos.w // 2) == round(self.position.x):
@@ -91,7 +97,7 @@ class EnemyMelee(pygame.sprite.Sprite):
                             # print('qqqqqqqqqqqqqqqqqqqq')
                     else:
                         self.vel.y += self.gravity
-                    print(self.vel.y)
+                    # print(self.vel.y)
                     self.rect.y += self.vel.y
                     self.rect.x += self.vel.x
                 # print(self.state['на земле'], self.rect.y)
@@ -144,7 +150,7 @@ class EnemyMelee(pygame.sprite.Sprite):
                 self.last_position = self.position
 
                 if pygame.sprite.collide_mask(self, self.main_hero):
-                    print('aaaaaaa')
+                    # print('aaaaaaa')
                     self.main_hero.hp -= 1
                     self.main_hero.hit = True
                     self.main_hero.hit_timer = pygame.time.get_ticks()
@@ -161,7 +167,8 @@ class EnemyRangeFly(pygame.sprite.Sprite):
     def __init__(self, group, special_group, platform_sprite_group, platform, main_hero):
         super().__init__(group)
         self.pause = False
-        self.image = load_image('temp.png')
+        self.image = load_image('animation/enemy_range.jpg', colorkey=(255, 255, 255))
+        self.image = pygame.transform.scale(self.image, (50, 50))
 
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = platform.rect.x, platform.rect.y - self.rect.h
@@ -467,13 +474,14 @@ class Bullet(pygame.sprite.Sprite):
 class Boss(pygame.sprite.Sprite):
     def __init__(self, group, special_group, platform_sprite_group, platform, main_hero):
         super().__init__(group)
-        self.image = load_image('temp.png')
+        self.image = load_image('animation/boss.jpg', colorkey=(255, 255, 255))
+        self.image = pygame.transform.scale(self.image, (70, 70))
 
         # создаем прямоугольник - объект
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = platform.rect.x, platform.rect.y - self.rect.h
         self.mask = pygame.mask.from_surface(self.image)
-        print('ПЛАТФОРМА', platform.rect.topleft)
+        # print('ПЛАТФОРМА', platform.rect.topleft)
 
         # константы
         self.pause = False
@@ -482,7 +490,7 @@ class Boss(pygame.sprite.Sprite):
         self.vel = pygame.math.Vector2(0, 0)
         self.direction = random.randint(0, 1)  # 0 for Right, 1 for Left
         self.vel.x = random.randint(2, 6) / 2  # Randomized velocity of the generated enemy
-        # self.vel.x = 0
+        #self.vel.x = 0
         self.vel.y = -20
         self.gravity = 2
 
@@ -516,7 +524,7 @@ class Boss(pygame.sprite.Sprite):
                 # elif self.platform.rect.x + self.platform.rect.w - 10 <= self.position.x <= self.platform.rect.x + self.platform.rect.w:
                 #     self.direction = 1
                 #     self.rect.x += self.vel.x
-                print('BOSS pos', self.position.x)
+                # print('BOSS pos', self.position.x)
 
                 if s < 500:
                     if round(self.main_hero_pos.x + self.main_hero_pos.w // 2) == round(self.position.x):
@@ -533,7 +541,7 @@ class Boss(pygame.sprite.Sprite):
                             # print('qqqqqqqqqqqqqqqqqqqq')
                     else:
                         self.vel.y += self.gravity
-                    print(self.vel.y)
+                    # print(self.vel.y)
                     if self.position.x < 650:
                         self.rect.x = 670
                     self.rect.y += self.vel.y
@@ -588,7 +596,7 @@ class Boss(pygame.sprite.Sprite):
                 self.last_position = self.position
 
                 if pygame.sprite.collide_mask(self, self.main_hero):
-                    print('aaaaaaa')
+                    # print('aaaaaaa')
                     self.main_hero.hp -= 1
 
                 # self.rect.center = self.pos  # Updates

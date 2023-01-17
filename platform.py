@@ -1,5 +1,5 @@
 import pygame
-
+from new import MainHero
 from utilities import load_image
 
 # настройки окна
@@ -29,8 +29,8 @@ class Platform(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(self.image, image_scale)
         self.rect = self.image.get_rect()
         # print(self.image.get_rect())
-        self.rect.x = coords[0] * 100 - 50
-        self.rect.y = coords[1] * 100 - 50
+        self.rect.x = coords[0] * 100
+        self.rect.y = coords[1] * 100
 
         self.platform_type = None
 
@@ -84,7 +84,7 @@ class PlatformMove(Platform):
 class PlatformSlippery(Platform):
     # картинка
     image = load_image("platform_slippery.png", colorkey=(0, 0, 0))
-    image = pygame.transform.scale(image, (150, 50))
+    image = pygame.transform.scale(image, (150, 100))
 
     def __init__(self, group, special_group, coords, image=image, image_scale=None):
         super().__init__(group, special_group, (coords[0], coords[1]))
@@ -98,8 +98,35 @@ class PlatformSlippery(Platform):
         pass
 
 
+class PlatformVertical(Platform):
+    # картинка
+    image = load_image('vertical_platform_1.jpg')
+    image = pygame.transform.scale(image, (50, 150))
+
+    def __init__(self, group, special_group, coords, image=image, image_scale=None):
+        super().__init__(group, special_group, (coords[0], coords[1]))
+        self.image = image
+        # print('a', self.image.get_rect(), self.rect)
+        self.rect.width, self.rect.height = self.image.get_rect().width, self.image.get_rect().height
+        # print('a', self.image.get_rect(), self.rect)
+        self.mask = pygame.mask.from_surface(self.image)
+
+        if image_scale:
+            self.image = pygame.transform.scale(self.image, image_scale)
+
+        self.platform_type = 'vertical'
+
+    def update(self, *args):
+        pass
+
+
 # добавление платформы в спрайты
-a = PlatformSlippery(all_sprites, platform_sprites, (2, 2))
+a = PlatformVertical(all_sprites, platform_sprites, (3, 1))
+c = PlatformVertical(all_sprites, platform_sprites, (3, 0))
+b = Platform(all_sprites, platform_sprites, (1, 2))
+m = MainHero(all_sprites, [platform_sprites])
+
+print(a.rect)
 # print(a.rect)
 if __name__ == '__main__':
     while running:
@@ -107,13 +134,17 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN:
+                print(m.rect)
 
             # отрисовка спрайта
             all_sprites.update(event)
         # зарисовка и загрузочный апдейт
-        screen.fill((255, 255, 255))
+        screen.fill((0, 0, 0))
         all_sprites.update()
         all_sprites.draw(screen)
         pygame.display.flip()
 
     pygame.quit()
+
+    
