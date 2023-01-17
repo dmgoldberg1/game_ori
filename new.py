@@ -51,6 +51,7 @@ class MainHero(pygame.sprite.Sprite):
 
         # расположение на экране
         self.rect = self.image.get_rect()
+        print('wwwww' ,self.rect)
         self.rect.x = 0
         self.rect.y = 0
         move_to_the_point(self, 'герой')

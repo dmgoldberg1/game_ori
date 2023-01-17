@@ -8,7 +8,7 @@ import pygame
 # import pygame_ai as pai
 from camera import Camera
 from data import timer_npc
-from new import MainHero
+from mainhero import MainHero
 from npc import NPC, EnemyMelee, EnemyRangeFly, Bullet, Boss
 from nullobject import Null_Object
 # import pygame_ai as pai

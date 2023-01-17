@@ -12,7 +12,7 @@ WIDTH, HEIGHT = 1000, 600
 
 
 class NPC(pygame.sprite.Sprite):
-    image = load_image("temp.png", colorkey=(255, 255, 255))
+    image = load_image("animation/npc.jpg", colorkey=(255, 255, 255))
     # print(image.get_rect())
     image = pygame.transform.scale(image, (151 // 2, 186 // 2))
 
@@ -34,7 +34,8 @@ class NPC(pygame.sprite.Sprite):
 class EnemyMelee(pygame.sprite.Sprite):
     def __init__(self, group, special_group, platform_sprite_group, platform, main_hero):
         super().__init__(group)
-        self.image = load_image('temp.png')
+        self.image = load_image('animation/enemy_melee.jpg', colorkey=(255, 255, 255))
+        self.image = pygame.transform.scale(self.image, (50, 50))
 
         # создаем прямоугольник - объект
         self.rect = self.image.get_rect()
@@ -159,7 +160,8 @@ class EnemyRangeFly(pygame.sprite.Sprite):
     def __init__(self, group, platform_sprite_group, coords):
         super().__init__(group)
         self.pause = False
-        self.image = load_image('temp.png')
+        self.image = load_image('animation/enemy_range.jpg', colorkey=(255, 255, 255))
+        self.image = pygame.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect(topleft=coords)
         self.pos = pygame.math.Vector2(0, 0)
         self.pos.x = coords[0]
@@ -310,7 +312,7 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self, x_enemy, y_enemy, x_hero, y_hero, group, platform_sprite_group):
         super().__init__(group)
         self.platform_sprite_group = platform_sprite_group
-        self.image = load_image('temp.png')
+        self.image = load_image('temp.png', colorkey=(255, 255, 255))
         self.rect = self.image.get_rect()
         self.rect.x = x_enemy
         self.rect.y = y_enemy
@@ -444,7 +446,8 @@ class Bullet(pygame.sprite.Sprite):
 class Boss(pygame.sprite.Sprite):
     def __init__(self, group, special_group, platform_sprite_group, platform, main_hero):
         super().__init__(group)
-        self.image = load_image('temp.png')
+        self.image = load_image('animation/boss.jpg', colorkey=(255, 255, 255))
+        self.image = pygame.transform.scale(self.image, (70, 70))
 
         # создаем прямоугольник - объект
         self.rect = self.image.get_rect()

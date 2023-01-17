@@ -27,20 +27,21 @@ class MainHero(pygame.sprite.Sprite):
     # print(image.get_rect())
     image = pygame.transform.scale(image, (151 // 2, 186 // 2))
 
-    def __init__(self, group, platform_sprite_group, sheet):
+    def __init__(self, group, platform_sprite_group):
         super().__init__(group)
         self.group = group
         self.platform_sprite_group = platform_sprite_group
         self.state = {'на земле': True,
                       'карабкается': False}
-        self.screen = sheet
 
         # работа с анимацией
-        self.moving_statuses = {'straight': [True, 'animation/mainhero/straight/', 9],
-                                'left': [True, 'animation/mainhero/left/', 8],
-                                'right': [True, 'animation/mainhero/right/', 8]}
-        self.image = load_image("animation/mainhero/straight/1.png", colorkey=(255, 255, 255))
-        self.animation_counter = 0
+        self.moving_statuses = {'straight': [True, 'animation\\mainhero\\straight\\', 12],
+                                'left': [True, 'animation\\mainhero\\left\\', 8],
+                                'right': [True, 'animation\\mainhero\\right\\', 8]}
+        self.image = load_image("animation\\mainhero\\straight\\1.jpg", colorkey=(255, 255, 255))
+        print('aaeaa', self.image.get_rect())
+        self.image = pygame.transform.scale(self.image, (75, 93))
+        self.animation_counter = 1
 
         # константы
         self.continue_moving_x = False
@@ -73,6 +74,7 @@ class MainHero(pygame.sprite.Sprite):
         self.y_vel = 0
 
         self.mask = pygame.mask.from_surface(self.image)
+        print('ffff', self.mask.get_rect())
 
         # up, down кнопки
         self.ud_buttons = [self.get_from_db('Прыжок'), 1073741906]
@@ -89,11 +91,12 @@ class MainHero(pygame.sprite.Sprite):
             else:
                 if not self.moving_statuses[key][0]:
                     self.moving_statuses[key][0] = True
-                    self.animation_counter = 0
+                    self.animation_counter = 1
         stat, name, count = self.moving_statuses[type_of_moving]
-        self.animation_counter = (self.animation_counter + 1) % count
-        self.image = load_image(f"{name}{self.animation_counter}.png", colorkey=(255, 255, 255))
-        self.rect.width, self.rect.height = self.image.get_rect()[2:]
+        self.animation_counter = (self.animation_counter + 1) % count + 1
+        self.image = load_image(f"{name}{self.animation_counter}.jpg", colorkey=(255, 255, 255))
+        self.image = pygame.transform.scale(self.image, (75, 93))
+        # self.rect.width, self.rect.height = self.image.get_rect()[2:]
 
     def get_from_db(self, db_link):
         con = sqlite3.connect(os.path.join('data', 'storage.db'))
