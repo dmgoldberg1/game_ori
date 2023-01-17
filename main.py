@@ -49,7 +49,7 @@ class Button(pygame.sprite.Sprite):
         global active_sprites
         global running
         # реакция на клик
-        if args and args[0].type == pygame.MOUSEBUTTONDOWN and \
+        if len(args) == 1 and args[0].type == pygame.MOUSEBUTTONDOWN and \
                 self.rect.collidepoint(args[0].pos):
 
             # сделал такую проверку на выход из игры
@@ -58,7 +58,7 @@ class Button(pygame.sprite.Sprite):
             else:
                 running = False
 
-        elif args and args[0].type == pygame.KEYDOWN:
+        elif len(args) == 1 and args[0].type == pygame.KEYDOWN:
             if args[0].key == 27:
                 if self.linked_page:
                     active_sprites = self.linked_page
@@ -152,6 +152,29 @@ class Label(pygame.sprite.Sprite):
         pass
 
 
+class LoadCover(pygame.sprite.Sprite):
+    def __init__(self, group):
+        super().__init__(group)
+
+        self.dots = 0
+        f1 = pygame.font.SysFont('arial', 60)
+        text1 = f1.render('Загрузка...' + ('.' * self.dots), True, pygame.Color("white"))
+
+        self.size = [1000, 600]
+        self.image = pygame.Surface(self.size)
+        self.image.fill((0, 0, 0))
+
+        self.image.blit(text1, (600 - text1.get_width(), 300 - text1.get_height()))
+
+        # координаты
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 0
+
+    def update(self, *args):
+        pass
+
+
 # загрузка уровней
 def load_level(filename, count):
     filename = "data/" + filename
@@ -184,14 +207,8 @@ def generate_level(l, number):
                     PlatformFire(all_sprites, platform_sprites, (x, y))
                 elif level[y][x] == '_':
                     a = Platform(all_sprites, platform_sprites, (x, y))
-                    # print((a.rect.x, a.rect.y))
+                    print((a.rect.x, a.rect.y))
                     enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
-                elif level[y][x] == '^':
-                    a = Platform(all_sprites, platform_sprites, (x, y))
-                    # print((a.rect.x, a.rect.y))
-                    boss = Boss(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
-                elif level[y][x] == '|':
-                    a = PlatformVertical(all_sprites, platform_sprites, (x, y))
     elif number == 1:
         for y in range(len(level)):
             for x in range(len(level[y])):
@@ -206,7 +223,7 @@ def generate_level(l, number):
                     PlatformFire(all_sprites, platform_sprites1, (x_1, y))
                 elif level[y][x] == '_':
                     a = Platform(all_sprites, platform_sprites1, (x_1, y))
-                    # print((a.rect.x, a.rect.y))
+                    print((a.rect.x, a.rect.y))
                     enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites1, a, main_hero)
     elif number == 2:
         count *= 2
@@ -223,7 +240,7 @@ def generate_level(l, number):
                     PlatformFire(all_sprites, platform_sprites2, (x_1, y))
                 elif level[y][x] == '_':
                     a = Platform(all_sprites, platform_sprites2, (x_1, y))
-                    # print((a.rect.x, a.rect.y))
+                    print((a.rect.x, a.rect.y))
                     enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites2, a, main_hero)
     return count * 100
 
@@ -234,11 +251,12 @@ def generate_level(l, number):
 # настройки окна
 pygame.init()
 size = WIDTH, HEIGHT = 1000, 600
-FPS = 60
+FPS = 30
 screen = pygame.display.set_mode(size)
 running = True
 clock = pygame.time.Clock()
 
+allow = True
 BackGround = Background('forest.jpg', [0, 0])
 
 # заготовки групп спрайтов
@@ -292,17 +310,19 @@ active_sprites = menu
 # drag = pai.steering.kinematic.Drag(15)
 # герой, уровень
 
-main_hero = MainHero(all_sprites, [platform_sprites])
+main_hero = MainHero(all_sprites, [platform_sprites], screen)
 null_object = Null_Object(all_sprites)
 enemy_range_fly = EnemyRangeFly(all_sprites, platform_sprites, (200, 100))
+load_cover = LoadCover(all_sprites)
+all_sprites.remove(load_cover)
 
-npc = NPC(all_sprites, (500, 100), 'Ты встретил деда!')
+npc = NPC(all_sprites, (2300, 100), 'Ты встретил деда!')
 tick = clock.tick(60) / 1000
 
 board1 = generate_level(load_level('map.txt', 0), 0)
 board2 = generate_level(load_level('map2.txt', 1), 1) * 2
 board3 = generate_level(load_level('map3.txt', 2), 2) * 2
-# print(board1, board2, board3)
+print(board1, board2, board3)
 
 npc_visited = False
 fire = True
@@ -315,7 +335,6 @@ camera = Camera(WIDTH, HEIGHT, main_hero)
 
 # симуляция
 ########################################################################################################################
-
 # запуск симуляции
 if __name__ == '__main__':
     while running:
@@ -325,7 +344,7 @@ if __name__ == '__main__':
         # обработка событий - отклик
         for event in pygame.event.get():
             # закрытие окна
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT and load_cover not in all_sprites:
                 running = False
 
             # карта (игра замерзает)
@@ -345,19 +364,18 @@ if __name__ == '__main__':
         screen.fill((255, 255, 255))
 
         # обрабатываем границы
-        if board1 - 200 <= main_hero.rect.x - null_object.rect.x <= board1 + 200 and len(
-                main_hero.platform_sprite_group) == 1:
+        if board1 - 200 <= main_hero.rect.x - null_object.rect.x <= board1 + 200 and len(main_hero.platform_sprite_group) == 1:
             main_hero.platform_sprite_group.append(platform_sprites1)
-            # print('aaaaaaaaa')
+            print('aaaaaaaaa')
         elif board2 - 200 <= main_hero.rect.x - null_object.rect.x <= board2 + 200 and len(main_hero.platform_sprite_group) == 2:
             main_hero.platform_sprite_group.append(platform_sprites2) #.append(platform_sprites2)
-            # print('aaaaaaaaa')
+            print('aaaaaaaaa')
         elif board1 + 200 <= main_hero.rect.x - null_object.rect.x <= board2 - 200 and len(main_hero.platform_sprite_group) == 2:
             main_hero.platform_sprite_group = [platform_sprites1]
-            # print('bbbbbbbbbbbb')
+            print('bbbbbbbbbbbb')
         elif board2 + 200 <= main_hero.rect.x - null_object.rect.x <= board3 - 200 and len(main_hero.platform_sprite_group) == 2:
             main_hero.platform_sprite_group = main_hero.platform_sprite_group[1:]
-            # print('bbbbbbbbbbbb')
+            print('bbbbbbbbbbbb')
 
         # фон (на else можно поменять фон меню)
         if active_sprites == all_sprites:
@@ -365,7 +383,7 @@ if __name__ == '__main__':
         else:
             pass
 
-        if sprite_distance(npc.rect, main_hero.rect, 130) and not npc.npc_visited:
+        if sprite_distance(npc.rect, main_hero.rect, 130) and not npc.npc_visited and main_hero.allow:
             # print('amogus')
             starttime = pygame.time.get_ticks()
             timer_npc[0] = False
@@ -387,6 +405,20 @@ if __name__ == '__main__':
             # если персонаж сейчас посещает нпс
             if npc.npc_visit:
                 screen.blit(npc.text_surface, (430, 50))
+
+        # работа с координатами
+        if not main_hero.allow and active_sprites == all_sprites:
+            all_sprites.update(null_object.rect.x, null_object.rect.y)
+
+            # натянуть 'загрузку'
+            if load_cover not in all_sprites:
+                load_cover = LoadCover(all_sprites)
+        else:
+            active_sprites.update()
+
+            # снять 'загрузку'
+            if load_cover in all_sprites:
+                all_sprites.remove(load_cover)
 
         for enemy in enemy_sprites:
             if type(enemy) == Boss:
@@ -422,7 +454,7 @@ if __name__ == '__main__':
             # print(sprite_distance(main_hero.rect, enemy.rect, 80))
             # print(main_hero.hp)
 
-        # Стрельба летающих нпс
+            # Стрельба летающих нпс
 
         if fire and sprite_distance(main_hero.rect, enemy_range_fly.rect, 500):
             bullet = Bullet(enemy_range_fly.rect.x, enemy_range_fly.rect.y, main_hero.position.x, main_hero.position.y,
@@ -445,15 +477,14 @@ if __name__ == '__main__':
         for bullet in bullets:
             bullet.draw(screen)
 
-
-        # print(bullets)
-        # print(sprite_distance(main_hero.rect, bullet.rect, 150))
+            # print(bullets)
+            # print(sprite_distance(main_hero.rect, bullet.rect, 150))
 
         if not fire and pygame.time.get_ticks() - bullet.fire_timer >= 1000:
             fire = True
             fire_boss = True
             bullet.fire_timer = 0
-        # print(main_hero.hp)
+            # print(main_hero.hp)
         active_sprites.update()
 
         # если экран игры
@@ -464,7 +495,7 @@ if __name__ == '__main__':
 
             # обновляем положение всех спрайтов
             for sprite in all_sprites:
-                if sprite != button_in_game:
+                if sprite != button_in_game and sprite != load_cover:
                     camera.apply(sprite)
             main_hero.last_position = main_hero.rect
             main_hero.position = main_hero.rect
@@ -477,9 +508,11 @@ if __name__ == '__main__':
     cur = con.cursor()
 
     result = cur.execute("""UPDATE saved_coordinates SET x = ? WHERE tag = ?""",
-                         (main_hero.rect.x, 'герой')).fetchall()
+                         (main_hero.rect.x - null_object.rect.x, 'герой')).fetchall()
     result = cur.execute("""UPDATE saved_coordinates SET y = ? WHERE tag = ?""",
-                         (main_hero.rect.y, 'герой')).fetchall()
+                         (main_hero.rect.y - null_object.rect.y, 'герой')).fetchall()
+
+    print(main_hero.rect.x - null_object.rect.x, main_hero.rect.y - null_object.rect.y)
 
     con.commit()
     con.close()
