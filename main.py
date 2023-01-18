@@ -13,7 +13,7 @@ from npc import NPC, EnemyMelee, EnemyRangeFly, Bullet, Boss
 from nullobject import Null_Object
 # import pygame_ai as pai
 # классы-работники
-from platform import Platform, PlatformSlippery, PlatformFire, PlatformVertical
+from Platform import Platform, PlatformSlippery, PlatformFire, PlatformVertical
 from utilities import Background, sprite_distance
 
 
@@ -202,6 +202,8 @@ def generate_level(l, number):
                     continue
                 elif level[y][x] == '-':
                     Platform(all_sprites, platform_sprites, (x, y))
+                elif level[y][x] == '|':
+                    PlatformVertical(all_sprites, platform_sprites, (x, y))
                 elif level[y][x] == '(':
                     PlatformSlippery(all_sprites, platform_sprites, (x, y))
                 elif level[y][x] == '/':
@@ -213,7 +215,7 @@ def generate_level(l, number):
                 elif level[y][x] == '$':
                     a = Platform(all_sprites, platform_sprites, (x, y))
                     print((a.rect.x, a.rect.y))
-                    npc_ded = NPC(all_sprites, (a.rect.x + 10, a.rect.y  - 40), 'Ты встретил деда!')
+                    npc_ded = NPC(all_sprites, (a.rect.x + 10, a.rect.y - 40), 'Ты встретил деда!')
                 elif level[y][x] == '+':
                     a = Platform(all_sprites, platform_sprites, (x, y))
                     print((a.rect.x, a.rect.y))
@@ -226,6 +228,8 @@ def generate_level(l, number):
                     continue
                 elif level[y][x] == '-':
                     Platform(all_sprites, platform_sprites1, (x_1, y))
+                elif level[y][x] == '|':
+                    PlatformVertical(all_sprites, platform_sprites1, (x_1, y))
                 elif level[y][x] == '(':
                     PlatformSlippery(all_sprites, platform_sprites1, (x_1, y))
                 elif level[y][x] == '/':
@@ -243,6 +247,8 @@ def generate_level(l, number):
                     continue
                 elif level[y][x] == '-':
                     Platform(all_sprites, platform_sprites2, (x_1, y))
+                elif level[y][x] == '|':
+                    PlatformVertical(all_sprites, platform_sprites2, (x_1, y))
                 elif level[y][x] == '(':
                     PlatformSlippery(all_sprites, platform_sprites2, (x_1, y))
                 elif level[y][x] == '/':
@@ -251,6 +257,26 @@ def generate_level(l, number):
                     a = Platform(all_sprites, platform_sprites2, (x_1, y))
                     print((a.rect.x, a.rect.y))
                     enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites2, a, main_hero)
+
+    elif number == 3:
+        for y in range(len(level)):
+            for x in range(len(level[y])):
+                if level[y][x] == '.':
+                    continue
+                elif level[y][x] == '-':
+                    Platform(education_sprites, education_platform_sprites, (x, y))
+                elif level[y][x] == '|':
+                    PlatformVertical(education_sprites, education_platform_sprites, (x, y))
+                elif level[y][x] == '(':
+                    PlatformSlippery(education_sprites, education_platform_sprites, (x, y))
+                elif level[y][x] == '/':
+                    PlatformFire(education_sprites, education_platform_sprites, (x, y))
+                elif level[y][x] == '_':
+                    a = Platform(education_sprites, education_platform_sprites, (x, y))
+                    print((a.rect.x, a.rect.y))
+                    enemy1 = EnemyMelee(education_sprites, education_enemy_sprites,
+                                        education_platform_sprites, a, education_main_hero)
+
     return count * 100
 
 
@@ -278,6 +304,10 @@ platform_sprites2 = pygame.sprite.Group()
 main_hero_sprite = pygame.sprite.Group()
 enemy_sprites = pygame.sprite.Group()
 
+education_sprites = pygame.sprite.Group()
+education_platform_sprites = pygame.sprite.Group()
+education_enemy_sprites = pygame.sprite.Group()
+
 # меню
 about = pygame.sprite.Group()
 menu = pygame.sprite.Group()
@@ -302,7 +332,7 @@ KeyRegister(settings, [WIDTH // 2 - 200, 330], 'Вправо')
 Label(menu, [WIDTH // 2 - 380, 50], 'Comic Sans MS', 'ЗАБАВНЫЕ ПРИКЛЮЧЕНИЯ', font_size=50)
 
 Button(menu, [WIDTH // 2 - 200, 150], [350, 70], 'Играть', all_sprites)
-Button(menu, [WIDTH // 2 - 200, 250], [350, 70], 'Обучение', all_sprites)
+Button(menu, [WIDTH // 2 - 200, 250], [350, 70], 'Обучение', education_sprites)
 Button(menu, [WIDTH // 2 - 200, 350], [350, 70], 'Настройки', settings)
 Button(menu, [WIDTH // 2 - 200, 450], [350, 70], 'Об игре', about)
 Button(menu, [0, 0], [40, 40], '←')
@@ -312,6 +342,7 @@ Button(about, [0, 0], [40, 40], '←', menu)
 Label(about, [60, 10], 'arial', 'ВСТАВИТЬ ОПИСАНИЕ (ctrl+c, ctrl+v из презентации) :)', font_size=30)
 # игру
 button_in_game = Button(all_sprites, [0, 0], [40, 40], '←', menu)
+ed_button = Button(education_sprites, [0, 0], [40, 40], '←', menu)
 
 # активное окно
 active_sprites = menu
@@ -320,9 +351,11 @@ active_sprites = menu
 # герой, уровень
 
 null_object = Null_Object(all_sprites)
+education_null_object = Null_Object(education_sprites)
 
 load_cover = LoadCover(all_sprites)
 main_hero = MainHero(all_sprites, [platform_sprites], null_object)
+education_main_hero = MainHero(education_sprites, [education_platform_sprites], education_null_object)
 all_sprites.remove(load_cover)
 
 # npc = NPC(all_sprites, (2300, 100), 'Ты встретил деда!')
@@ -331,6 +364,7 @@ tick = clock.tick(60) / 1000
 board1 = generate_level(load_level('map.txt', 0), 0)
 board2 = generate_level(load_level('map2.txt', 1), 1) * 2
 board3 = generate_level(load_level('map3.txt', 2), 2) * 2
+education_board = generate_level(load_level('map_education.txt', 0), 3)
 print(board1, board2, board3)
 
 npc_visited = False
@@ -342,6 +376,7 @@ test = True
 check = 1
 # камера
 camera = Camera(WIDTH, HEIGHT, main_hero)
+education_camera = Camera(WIDTH, HEIGHT, education_main_hero)
 
 # симуляция
 ########################################################################################################################
@@ -488,6 +523,15 @@ if __name__ == '__main__':
                     camera.apply(sprite)
             main_hero.last_position = main_hero.rect
             main_hero.position = main_hero.rect
+
+        elif active_sprites == education_sprites:
+            education_camera.update(education_main_hero)
+            # обновляем положение всех спрайтов
+            for sprite in education_sprites:
+                if sprite != ed_button:
+                    education_camera.apply(sprite)
+            education_main_hero.last_position = education_main_hero.rect
+            education_main_hero.position = education_main_hero.rect
 
         active_sprites.draw(screen)
         pygame.display.flip()
