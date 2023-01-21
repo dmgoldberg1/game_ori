@@ -366,6 +366,7 @@ class Bullet(pygame.sprite.Sprite):
         length = math.hypot(*self.dir)
         self.fire = False
         self.fire_timer = 0
+        self.fire_timer_hero = 0
         if length == 0.0:
             self.dir = (0, -1)
         else:
@@ -375,7 +376,7 @@ class Bullet(pygame.sprite.Sprite):
         # self.bullet = pygame.Surface((7, 2)).convert_alpha()
         # self.bullet.fill((255, 255, 255))
         self.image = pygame.transform.rotate(self.image, angle)
-        self.speed = 5
+        self.speed = 20
 
     def update(self, *args):
         # print('ПАУЗА', self.pause)
