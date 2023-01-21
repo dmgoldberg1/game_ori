@@ -13,12 +13,23 @@ from npc import NPC, EnemyMelee, EnemyRangeFly, Bullet, Boss
 from nullobject import Null_Object
 # import pygame_ai as pai
 # классы-работники
-from Platform import Platform, PlatformSlippery, PlatformFire, PlatformVertical
-from utilities import Background, sprite_distance
+from platform import Platform, PlatformSlippery, PlatformFire, PlatformVertical
+from utilities import Background, sprite_distance, load_image
 
 
 # рабочие классы/функции
 ########################################################################################################################
+
+class Hp_status(pygame.sprite.Sprite):
+    def __init__(self, group):
+        pygame.sprite.Sprite.__init__(self, group)
+        self.image = load_image("animation\\hp_status.png", colorkey=(255, 255, 255))
+        self.image = pygame.transform.scale(self.image, (WIDTH, HEIGHT))
+        self.image = self.image.convert()
+        # self.image.set_colorkey(-1, RLEACCEL)
+        self.image.set_alpha(50)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 2, HEIGHT // 2)
 
 # кнопка
 class Button(pygame.sprite.Sprite):
@@ -303,6 +314,8 @@ platform_sprites1 = pygame.sprite.Group()
 platform_sprites2 = pygame.sprite.Group()
 main_hero_sprite = pygame.sprite.Group()
 enemy_sprites = pygame.sprite.Group()
+hp_status_group = pygame.sprite.Group()
+
 
 education_sprites = pygame.sprite.Group()
 education_platform_sprites = pygame.sprite.Group()
@@ -348,8 +361,9 @@ ed_button = Button(education_sprites, [0, 0], [40, 40], '←', menu)
 active_sprites = menu
 # gravity_entities = []
 # drag = pai.steering.kinematic.Drag(15)
-# герой, уровень
 
+# герой, уровень
+hp_status = Hp_status(hp_status_group)
 null_object = Null_Object(all_sprites)
 education_null_object = Null_Object(education_sprites)
 
@@ -500,7 +514,7 @@ if __name__ == '__main__':
                         # print(bullets)
                         # print(sprite_distance(main_hero.rect, bullet.rect, 150))
 
-                    if not fire and pygame.time.get_ticks() - bullet.fire_timer >= 3000:
+                    if not fire and pygame.time.get_ticks() - bullet.fire_timer >= 5000:
                         fire = True
                         bullet.fire_timer = 0
             # print(sprite_distance(main_hero.rect, enemy.rect, 80))
@@ -524,6 +538,8 @@ if __name__ == '__main__':
             main_hero.last_position = main_hero.rect
             main_hero.position = main_hero.rect
 
+
+
         elif active_sprites == education_sprites:
             education_camera.update(education_main_hero)
             # обновляем положение всех спрайтов
@@ -534,6 +550,9 @@ if __name__ == '__main__':
             education_main_hero.position = education_main_hero.rect
 
         active_sprites.draw(screen)
+        if active_sprites == all_sprites:
+            hp_status.image.set_alpha((10 - main_hero.hp) * 10)
+            hp_status_group.draw(screen)
         pygame.display.flip()
 
     # сохраняем позицию игрока

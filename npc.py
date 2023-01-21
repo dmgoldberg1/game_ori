@@ -12,7 +12,7 @@ WIDTH, HEIGHT = 1000, 600
 
 
 class NPC(pygame.sprite.Sprite):
-    image = load_image("animation/npc.jpg", colorkey=(255, 255, 255))
+    image = load_image("animation\\npc.png", colorkey=(255, 255, 255))
     # print(image.get_rect())
     image = pygame.transform.scale(image, (90, 90))
 
@@ -34,7 +34,7 @@ class NPC(pygame.sprite.Sprite):
 class EnemyMelee(pygame.sprite.Sprite):
     def __init__(self, group, special_group, platform_sprite_group, platform, main_hero):
         super().__init__(group)
-        self.image = load_image('animation/enemy_melee.jpg', colorkey=(255, 255, 255))
+        self.image = load_image('animation\\enemy_melee.png', colorkey=(255, 255, 255))
         self.image = pygame.transform.scale(self.image, (50, 50))
 
         # создаем прямоугольник - объект
@@ -167,8 +167,8 @@ class EnemyRangeFly(pygame.sprite.Sprite):
     def __init__(self, group, special_group, platform_sprite_group, platform, main_hero):
         super().__init__(group)
         self.pause = False
-        self.image = load_image('animation/enemy_range.jpg', colorkey=(255, 255, 255))
-        self.image = pygame.transform.scale(self.image, (50, 50))
+        self.image = load_image('animation\\enemy_range.png', colorkey=(255, 255, 255))
+        self.image = pygame.transform.scale(self.image, (75, 50))
 
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = platform.rect.x, platform.rect.y - self.rect.h
@@ -474,7 +474,7 @@ class Bullet(pygame.sprite.Sprite):
 class Boss(pygame.sprite.Sprite):
     def __init__(self, group, special_group, platform_sprite_group, platform, main_hero):
         super().__init__(group)
-        self.image = load_image('animation/boss.jpg', colorkey=(255, 255, 255))
+        self.image = load_image('animation\\boss.png', colorkey=(255, 255, 255))
         self.image = pygame.transform.scale(self.image, (70, 70))
 
         # создаем прямоугольник - объект

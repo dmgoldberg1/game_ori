@@ -36,13 +36,14 @@ class MainHero(pygame.sprite.Sprite):
                       'карабкается': False}
 
         # работа с анимацией
-        self.moving_statuses = {'straight': [True, 'animation\\mainhero\\straight\\', 12],
-                                'left': [True, 'animation\\mainhero\\left\\', 8],
-                                'right': [True, 'animation\\mainhero\\right\\', 8]}
-        self.image = load_image("animation\\mainhero\\straight\\1.jpg", colorkey=(255, 255, 255))
+        self.moving_statuses = {'straight': [True, 'animation\\mainhero\\straight2\\', 12],
+                                'left': [True, 'animation\\mainhero\\left2\\', 8],
+                                'right': [True, 'animation\\mainhero\\right2\\', 8]}
+        self.image = load_image("animation\\mainhero\\straight2\\1.png")
         print('aaeaa', self.image.get_rect())
-        self.image = pygame.transform.scale(self.image, (75, 93))
+        self.image = pygame.transform.scale(self.image, (50, 75))
         self.animation_counter = 1
+        self.status_direct = 'straight'
 
         # константы
         self.continue_moving_x = False
@@ -76,6 +77,7 @@ class MainHero(pygame.sprite.Sprite):
         self.y_vel = 0
 
         self.mask = pygame.mask.from_surface(self.image)
+        print('sdgsfdgsergdsweg',self.mask.get_rect())
 
         # up, down кнопки
         self.ud_buttons = [self.get_from_db('Прыжок'), 1073741906]
@@ -94,9 +96,13 @@ class MainHero(pygame.sprite.Sprite):
                     self.moving_statuses[key][0] = True
                     self.animation_counter = 0
         stat, name, count = self.moving_statuses[type_of_moving]
-        self.animation_counter = (self.animation_counter + 1) % count + 1
-        self.image = load_image(f"{name}{self.animation_counter}.jpg", colorkey=(255, 255, 255))
-        self.image = pygame.transform.scale(self.image, (75, 93))
+        self.animation_counter = (self.animation_counter + 1) % count
+        self.image = load_image(f"{name}{self.animation_counter + 1}.png")
+        # self.image = load_image(f"animation\\mainhero\\straight\\1.png", colorkey=(0, 255, 0))
+        self.image = pygame.transform.scale(self.image, (50, 75))
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.width, self.rect.height = self.image.get_rect()[2:]
+        # print('qwq',self.mask.get_rect(), self.mask.count() ,self.image.get_rect(), self.animation_counter)
 
     def get_from_db(self, db_link):
         con = sqlite3.connect(os.path.join('data', 'storage.db'))
@@ -354,10 +360,14 @@ class MainHero(pygame.sprite.Sprite):
             # обновление изображения
             if self.position.x == self.last_position.x:
                 self.animation_image('straight')
+                self.status_direct = 'straight'
             elif self.position.x > self.last_position.x:
                 self.animation_image('right')
+                self.status_direct = 'right'
             elif self.position.x < self.last_position.x:
                 self.animation_image('left')
+                self.status_direct = 'left'
+
 
             # упал - умер - возродился
             # теперь: набрал большую скорость - умер - возродился
