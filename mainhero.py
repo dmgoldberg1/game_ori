@@ -1,11 +1,19 @@
 import os
 import sqlite3
-
 import pygame
-
 from data import timer_npc
 from nullobject import Null_Object
 from utilities import load_image
+
+# музыка
+pygame.mixer.pre_init(44100, -16, 1, 512)
+# pygame.mixer.music.load("data\\music\\Diskoteka_Avariya_-_Novogodnyaya_48707470.mp3")
+# music_play = False
+sound_down = pygame.mixer.Sound("data\\music\\gluhoy-zvuk-padeniya-myagkogo-predmeta.wav")
+
+# pygame.mixer.music.play(-1)
+# pygame.mixer.music.stop()
+
 
 # настройки окна
 size = WIDHT, HEIGHT = 1000, 600
@@ -279,6 +287,7 @@ class MainHero(pygame.sprite.Sprite):
                             if self.state['на земле']:
                                 self.y_vel = 0
                             if not platform_rect.collidepoint(self.last_position.right, self.last_position.bottom):
+                                sound_down.play()
                                 print(collide_down_right)
                                 self.y_vel = 0
                                 self.state['на земле'] = True
@@ -293,6 +302,7 @@ class MainHero(pygame.sprite.Sprite):
                             if self.state['на земле']:
                                 self.y_vel = 0
                             if not platform_rect.collidepoint(self.last_position.left, self.last_position.bottom):
+                                sound_down.play()
                                 print(collide_down_left)
                                 self.y_vel = 0
                                 self.state['на земле'] = True

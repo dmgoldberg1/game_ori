@@ -16,6 +16,15 @@ from nullobject import Null_Object
 from platform import Platform, PlatformSlippery, PlatformFire, PlatformVertical
 from utilities import Background, sprite_distance, load_image
 
+# музыка
+pygame.mixer.pre_init(44100, -16, 1, 512)
+pygame.mixer.music.load('data\\music\\Мощная Эпическая Музыка _ The BEST Epic Music (256  kbps).mp3')
+
+music_play = False
+pygame.mixer.music.play(-1)
+# pygame.mixer.music.stop()
+
+
 
 # рабочие классы/функции
 ########################################################################################################################
@@ -30,6 +39,7 @@ class Hp_status(pygame.sprite.Sprite):
         self.image.set_alpha(50)
         self.rect = self.image.get_rect()
         self.rect.center = (WIDTH // 2, HEIGHT // 2)
+
 
 # кнопка
 class Button(pygame.sprite.Sprite):
@@ -316,7 +326,6 @@ main_hero_sprite = pygame.sprite.Group()
 enemy_sprites = pygame.sprite.Group()
 hp_status_group = pygame.sprite.Group()
 
-
 education_sprites = pygame.sprite.Group()
 education_platform_sprites = pygame.sprite.Group()
 education_enemy_sprites = pygame.sprite.Group()
@@ -430,16 +439,20 @@ if __name__ == '__main__':
         screen.fill((255, 255, 255))
 
         # обрабатываем границы
-        if board1 - 200 <= main_hero.rect.x - null_object.rect.x <= board1 + 200 and len(main_hero.platform_sprite_group) == 1:
+        if board1 - 200 <= main_hero.rect.x - null_object.rect.x <= board1 + 200 and len(
+                main_hero.platform_sprite_group) == 1:
             main_hero.platform_sprite_group.append(platform_sprites1)
             print('aaaaaaaaa')
-        elif board2 - 200 <= main_hero.rect.x - null_object.rect.x <= board2 + 200 and len(main_hero.platform_sprite_group) == 2:
-            main_hero.platform_sprite_group.append(platform_sprites2) #.append(platform_sprites2)
+        elif board2 - 200 <= main_hero.rect.x - null_object.rect.x <= board2 + 200 and len(
+                main_hero.platform_sprite_group) == 2:
+            main_hero.platform_sprite_group.append(platform_sprites2)  # .append(platform_sprites2)
             print('aaaaaaaaa')
-        elif board1 + 200 <= main_hero.rect.x - null_object.rect.x <= board2 - 200 and len(main_hero.platform_sprite_group) == 2:
+        elif board1 + 200 <= main_hero.rect.x - null_object.rect.x <= board2 - 200 and len(
+                main_hero.platform_sprite_group) == 2:
             main_hero.platform_sprite_group = [platform_sprites1]
             print('bbbbbbbbbbbb')
-        elif board2 + 200 <= main_hero.rect.x - null_object.rect.x <= board3 - 200 and len(main_hero.platform_sprite_group) == 2:
+        elif board2 + 200 <= main_hero.rect.x - null_object.rect.x <= board3 - 200 and len(
+                main_hero.platform_sprite_group) == 2:
             main_hero.platform_sprite_group = main_hero.platform_sprite_group[1:]
             print('bbbbbbbbbbbb')
 
@@ -522,7 +535,6 @@ if __name__ == '__main__':
 
             # Стрельба летающих нпс
 
-
         active_sprites.update()
 
         # если экран игры
@@ -533,10 +545,12 @@ if __name__ == '__main__':
 
             # обновляем положение всех спрайтов
             for sprite in all_sprites:
+                # print(type(sprite) if type(sprite) != Platform else 0)
                 if sprite != button_in_game and sprite != load_cover:
                     camera.apply(sprite)
             main_hero.last_position = main_hero.rect
             main_hero.position = main_hero.rect
+            # print('dddddddddddddddddd')
 
 
 
