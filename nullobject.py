@@ -12,6 +12,8 @@ class Null_Object(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
         # расположение на экране
+        self.image = Null_Object.image
+        self.image.set_alpha(0)
         self.rect = self.image.get_rect()
         self.rect.x = 0
         self.rect.y = 0

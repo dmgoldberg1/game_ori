@@ -203,8 +203,11 @@ class MainHero(pygame.sprite.Sprite):
         # движение исходящее из события
         elif self.allow:
             # обработка платформы
+            print(self.platform_type)
             if self.platform_type == 'slippery':
                 self.continue_moving_x = True
+            elif self.platform_type == 'fire':
+                self.hp -= 1
             else:
                 if not self.button_lr_pressed:
                     self.continue_moving_x = False
@@ -291,6 +294,7 @@ class MainHero(pygame.sprite.Sprite):
                                 self.y_vel = 0
                             if not platform_rect.collidepoint(self.last_position.right, self.last_position.bottom):
                                 sound_down.play()
+                                self.platform_type = platform.platform_type
                                 print(collide_down_right)
                                 self.y_vel = 0
                                 self.state['на земле'] = True
@@ -306,6 +310,7 @@ class MainHero(pygame.sprite.Sprite):
                                 self.y_vel = 0
                             if not platform_rect.collidepoint(self.last_position.left, self.last_position.bottom):
                                 sound_down.play()
+                                self.platform_type = platform.platform_type
                                 print(collide_down_left)
                                 self.y_vel = 0
                                 self.state['на земле'] = True

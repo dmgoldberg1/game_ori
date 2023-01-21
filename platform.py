@@ -14,13 +14,13 @@ pygame.init()
 # группы спрайтов
 all_sprites = pygame.sprite.Group()
 platform_sprites = pygame.sprite.Group()
-
+platform_size = (110, 15)
 
 # класс платформы
 class Platform(pygame.sprite.Sprite):
     # картинка
     image = load_image("animation/platform.png")
-    image = pygame.transform.scale(image, (150, 10))
+    image = pygame.transform.scale(image, platform_size)
 
     def __init__(self, group, special_group, coords, image=image, image_scale=None):
         super().__init__(group)
@@ -49,15 +49,15 @@ class Platform(pygame.sprite.Sprite):
 
 class PlatformFire(Platform):
     # картинка
-    image = load_image("platform_fire.png", colorkey=(0, 0, 0))
-    image = pygame.transform.scale(image, (150, 10))
+    image = load_image("animation\\platform_fire1.png", colorkey=(255, 255, 255))
+    image = pygame.transform.scale(image, platform_size)
 
     def __init__(self, group, special_group, coords, image=image, image_scale=None):
         super().__init__(group, special_group, coords)
         self.image = image
         if image_scale:
             self.image = pygame.transform.scale(self.image, image_scale)
-
+        self.rect.y -= 3
         self.platform_type = 'fire'
 
     def update(self, *args):
@@ -67,7 +67,7 @@ class PlatformFire(Platform):
 class PlatformSlippery(Platform):
     # картинка
     image = load_image("animation/platform_slippery.png")
-    image = pygame.transform.scale(image, (150, 10))
+    image = pygame.transform.scale(image, platform_size)
 
     def __init__(self, group, special_group, coords, image=image, image_scale=None):
         super().__init__(group, special_group, (coords[0], coords[1]))

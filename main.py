@@ -24,8 +24,10 @@ music_play = False
 pygame.mixer.music.play(-1)
 
 
-# pygame.mixer.music.stop()
+# pygame.mixer.music.set_volume()
 
+
+# pygame.mixer.music.stop()
 
 
 # рабочие классы/функции
@@ -234,19 +236,21 @@ def generate_level(l, number):
                 elif level[y][x] == '_':
                     a = Platform(all_sprites, platform_sprites, (x, y))
                     print((a.rect.x, a.rect.y))
-                    enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
+                    enemy1 = EnemyMelee(all_sprites, all_enemy_sprites, enemy_sprites, platform_sprites, a, main_hero)
                 elif level[y][x] == '$':
                     a = Platform(all_sprites, platform_sprites, (x, y))
                     print((a.rect.x, a.rect.y))
-                    npc_ded = NPC(all_sprites, (a.rect.x + 10, a.rect.y - 40), 'Ты встретил деда!')
+                    npc_ded = NPC(all_sprites, (a.rect.x + 10, a.rect.y - 40),
+                                  'Ты встретил деда! Теперь у тебя есть способность Двойной прыжок')
                 elif level[y][x] == '+':
                     a = Platform(all_sprites, platform_sprites, (x, y))
                     print((a.rect.x, a.rect.y))
-                    enemy1 = EnemyRangeFly(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
+                    enemy1 = EnemyRangeFly(all_sprites, all_enemy_sprites, enemy_sprites, platform_sprites, a,
+                                           main_hero)
                 elif level[y][x] == '^':
                     a = Platform(all_sprites, platform_sprites, (x, y))
                     print((a.rect.x, a.rect.y))
-                    #enemy1 = Boss(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
+
     elif number == 1:
         for y in range(len(level)):
             for x in range(len(level[y])):
@@ -264,7 +268,7 @@ def generate_level(l, number):
                 elif level[y][x] == '_':
                     a = Platform(all_sprites, platform_sprites1, (x_1, y))
                     print((a.rect.x, a.rect.y))
-                    enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites1, a, main_hero)
+                    enemy1 = EnemyMelee(all_sprites, all_enemy_sprites, enemy_sprites, platform_sprites1, a, main_hero)
                 elif level[y][x] == '$':
                     a = Platform(all_sprites, platform_sprites1, (x_1, y))
                     print((a.rect.x, a.rect.y))
@@ -272,11 +276,12 @@ def generate_level(l, number):
                 elif level[y][x] == '+':
                     a = Platform(all_sprites, platform_sprites1, (x_1, y))
                     print((a.rect.x, a.rect.y))
-                    enemy1 = EnemyRangeFly(all_sprites, enemy_sprites, platform_sprites1, a, main_hero)
+                    enemy1 = EnemyRangeFly(all_sprites, all_enemy_sprites, enemy_sprites, platform_sprites1, a,
+                                           main_hero)
                 elif level[y][x] == '^':
                     a = Platform(all_sprites, platform_sprites1, (x_1, y))
                     print((a.rect.x, a.rect.y))
-                    # enemy1 = Boss(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
+                    # enemy1 = Boss(all_sprites, enemy_sprites, platform_sprites1, a, main_hero)
     elif number == 2:
         count *= 2
         for y in range(len(level)):
@@ -295,7 +300,7 @@ def generate_level(l, number):
                 elif level[y][x] == '_':
                     a = Platform(all_sprites, platform_sprites2, (x_1, y))
                     print((a.rect.x, a.rect.y))
-                    enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites2, a, main_hero)
+                    enemy1 = EnemyMelee(all_sprites, all_enemy_sprites, enemy_sprites, platform_sprites2, a, main_hero)
                 elif level[y][x] == '$':
                     a = Platform(all_sprites, platform_sprites2, (x_1, y))
                     print((a.rect.x, a.rect.y))
@@ -303,11 +308,42 @@ def generate_level(l, number):
                 elif level[y][x] == '+':
                     a = Platform(all_sprites, platform_sprites2, (x_1, y))
                     print((a.rect.x, a.rect.y))
-                    enemy1 = EnemyRangeFly(all_sprites, enemy_sprites, platform_sprites2, a, main_hero)
+                    enemy1 = EnemyRangeFly(all_sprites, all_enemy_sprites, enemy_sprites, platform_sprites2, a,
+                                           main_hero)
                 elif level[y][x] == '^':
                     a = Platform(all_sprites, platform_sprites2, (x_1, y))
                     print((a.rect.x, a.rect.y))
-                    # enemy1 = Boss(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
+                    enemy1 = Boss(all_sprites, all_enemy_sprites, boss_sprites, platform_sprites2, a, main_hero)
+    elif number == 3:
+        for y in range(len(level)):
+            for x in range(len(level[y])):
+                x_1 = x + count
+                if level[y][x] == '.':
+                    continue
+                elif level[y][x] == '-':
+                    Platform(education_sprites, education_platform_sprites, (x, y))
+                elif level[y][x] == '|':
+                    PlatformVertical(education_sprites, education_platform_sprites, (x, y))
+                elif level[y][x] == '(':
+                    PlatformSlippery(education_sprites, education_platform_sprites, (x, y))
+                elif level[y][x] == '/':
+                    PlatformFire(education_sprites, education_platform_sprites, (x, y))
+                elif level[y][x] == '_':
+                    a = Platform(education_sprites, education_platform_sprites, (x, y))
+                    print((a.rect.x, a.rect.y))
+                    enemy1 = EnemyMelee(education_sprites, education_all_enemy_sprites, education_enemy_sprites,
+                                        education_platform_sprites, a,
+                                        education_main_hero)
+                elif level[y][x] == '$':
+                    a = Platform(education_sprites, education_platform_sprites, (x, y))
+                    print((a.rect.x, a.rect.y))
+                    npc_ded = NPC(education_sprites, (a.rect.x + 10, a.rect.y - 40), 'Ты встретил деда!')
+                elif level[y][x] == '+':
+                    a = Platform(education_sprites, education_platform_sprites, (x, y))
+                    print((a.rect.x, a.rect.y))
+                    enemy1 = EnemyRangeFly(education_sprites, education_all_enemy_sprites, education_enemy_sprites,
+                                           education_platform_sprites, a,
+                                           education_main_hero)
 
     return count * 100
 
@@ -325,11 +361,13 @@ clock = pygame.time.Clock()
 
 allow = True
 BackGround = Background('forest.jpg', [0, 0])
-
+MenuBackGround = Background('menu.jpg', [-80, 0])
+WinBackGround = Background('win.jpg', [330, 250])
 # заготовки групп спрайтов
 
 # игра
 all_sprites = pygame.sprite.Group()
+all_enemy_sprites = pygame.sprite.Group()
 platform_sprites = pygame.sprite.Group()
 platform_sprites1 = pygame.sprite.Group()
 platform_sprites2 = pygame.sprite.Group()
@@ -338,8 +376,10 @@ enemy_sprites = pygame.sprite.Group()
 hp_status_group = pygame.sprite.Group()
 result = pygame.sprite.Group()
 total = pygame.sprite.Group()
+boss_sprites = pygame.sprite.Group()
 
 education_sprites = pygame.sprite.Group()
+education_all_enemy_sprites = pygame.sprite.Group()
 education_platform_sprites = pygame.sprite.Group()
 education_enemy_sprites = pygame.sprite.Group()
 
@@ -374,8 +414,8 @@ KeyRegister(settings, [WIDTH // 2 - 200, 270], 'Вправо')
 Label(settings, [WIDTH // 2 - 480, 330], 'arial', 'Заморозка времени')
 KeyRegister(settings, [WIDTH // 2 - 200, 330], 'Карта')
 
-Button(total, [WIDTH // 2 - 200, 250], [350, 70], 'Выйти в меню', menu)
-Label(total, [WIDTH // 2 - 260, 30], 'calibri', 'победа', font_size=120)
+Button(total, [WIDTH // 2 - 200, 150], [350, 70], 'Выйти в меню', menu)
+Label(total, [WIDTH // 2 - 220, 30], 'calibri', 'победа', font_size=120)
 # меню
 Label(menu, [WIDTH // 2 - 380, 50], 'Comic Sans MS', 'ЗАБАВНЫЕ ПРИКЛЮЧЕНИЯ', font_size=50)
 
@@ -419,7 +459,6 @@ print(board1, board2, board3)
 npc_visited = False
 fire = True
 
-
 npc_visited = False
 fire = True
 fire_hero = True
@@ -449,9 +488,9 @@ if __name__ == '__main__':
             if event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
                 print('MOUSE', pos)
-                if active_sprites == all_sprites: #306 <= pos[0] <= 643 and
+                if active_sprites == all_sprites:  # 306 <= pos[0] <= 643 and
                     pause = False
-                else: # 5 <= pos[0] <= 35
+                else:  # 5 <= pos[0] <= 35
                     pause = True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if fire_hero:
@@ -495,14 +534,17 @@ if __name__ == '__main__':
         # фон (на else можно поменять фон меню)
         if active_sprites == all_sprites:
             screen.blit(BackGround.image, BackGround.rect)
+        elif active_sprites != total:
+            screen.blit(MenuBackGround.image, MenuBackGround.rect)
         else:
-            pass
+            screen.blit(WinBackGround.image, WinBackGround.rect)
 
         if sprite_distance(npc_ded.rect, main_hero.rect, 130) and not npc_ded.npc_visited and main_hero.allow:
             # print('amogus')
             starttime = pygame.time.get_ticks()
             timer_npc[0] = False
-
+            main_hero.x_vel = 0
+            main_hero.y_vel = 0
             npc_ded.npc_visited = True
             npc_ded.npc_visit = True
             npc_ded.npc_time_visit = pygame.time.get_ticks()
@@ -512,14 +554,14 @@ if __name__ == '__main__':
         if npc_ded.npc_time_visit:
 
             # если время посещения превосходит 5 сек
-            if pygame.time.get_ticks() - npc_ded.npc_time_visit >= 5000:
+            if pygame.time.get_ticks() - npc_ded.npc_time_visit >= 3000:
                 npc_ded.npc_visit = False
                 npc_ded.npc_time_visit = 0
                 timer_npc[0] = True
 
             # если персонаж сейчас посещает нпс
             if npc_ded.npc_visit:
-                screen.blit(npc_ded.text_surface, (430, 50))
+                screen.blit(npc_ded.text_surface, (30, 40))  # (npc_ded.rect.x, npc_ded.rect.y - 20)
                 activate_skill('двойной прыжок')
 
         if not enemy_sprites:
@@ -540,10 +582,10 @@ if __name__ == '__main__':
             if load_cover in all_sprites:
                 all_sprites.remove(load_cover)
 
-        for enemy in enemy_sprites:
+        for enemy in all_enemy_sprites:
             if not pause:
                 if type(enemy) == Boss or type(enemy) == EnemyRangeFly:
-                    if fire and sprite_distance(main_hero.rect, enemy.rect, 500):
+                    if fire and sprite_distance(main_hero.rect, enemy.rect, 1000):
                         bullet = Bullet(enemy.rect.x, enemy.rect.y, main_hero.position.x,
                                         main_hero.position.y,
                                         all_sprites, platform_sprites, True)
@@ -632,9 +674,10 @@ if __name__ == '__main__':
             hp_status.image.set_alpha((10 - main_hero.hp) * 10)
             hp_status_group.draw(screen)
         if main_hero.death:
+            main_hero.platform_type = None
             main_hero.platform_sprite_group = [platform_sprites]
             temp = Label(result, [WIDTH // 2 - 400, 130], 'calibri',
-                         'Пройдено за ' + str(pygame.time.get_ticks() // 1000) + ' секунд(ы)', font_size=80)
+                         'Потрачено ' + str(pygame.time.get_ticks() // 1000) + ' секунд(ы)', font_size=80)
             active_sprites = result
             main_hero.death = False
         pygame.display.flip()
