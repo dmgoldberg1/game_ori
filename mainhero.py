@@ -10,7 +10,7 @@ pygame.mixer.pre_init(44100, -16, 1, 512)
 # pygame.mixer.music.load("data\\music\\Diskoteka_Avariya_-_Novogodnyaya_48707470.mp3")
 # music_play = False
 sound_down = pygame.mixer.Sound("data\\music\\gluhoy-zvuk-padeniya-myagkogo-predmeta.wav")
-
+sound_down.set_volume(0.8)
 # pygame.mixer.music.play(-1)
 # pygame.mixer.music.stop()
 
@@ -63,6 +63,7 @@ class MainHero(pygame.sprite.Sprite):
         self.allow = False
         self.null_object = null_object
         self.jump_count = 1 + skill_check('двойной прыжок')
+        self.death = False
 
         # игровые моменты
         self.allow = False
@@ -384,25 +385,22 @@ class MainHero(pygame.sprite.Sprite):
 
             # упал - умер - возродился
             # теперь: набрал большую скорость - умер - возродился
-            if self.y_vel > 100:
+            if self.y_vel > 100 or self.hp <= 0:
                 self.allow = False
-                self.hp = 10
-                # сохраняем позицию игрока
+                self.hp = 10  # сохраняем позицию игрока
                 con = sqlite3.connect(os.path.join('data', 'storage.db'))
                 cur = con.cursor()
 
-                dx = self.rect.x - self.null_object.rect.x
-                dy = self.rect.y - self.null_object.rect.y
-                print('sdsdsdsdsdsds', dx, dy)
-                if dy > 2000:
-                    dx = 150
-                    dy = 200
-                result = cur.execute("""UPDATE saved_coordinates SET x = ? WHERE tag = ?""",
-                                     (dx, 'герой')).fetchall()
-                result = cur.execute("""UPDATE saved_coordinates SET y = ? WHERE tag = ?""",
-                                     (dy, 'герой')).fetchall()
+                dx = 150
+                dy = 200
+                result = cur.execute("""UPDATE saved_coordinates SET x = ? WHERE tag = ?""", (dx, 'герой')).fetchall()
+                result = cur.execute("""UPDATE saved_coordinates SET y = ? WHERE tag = ?""", (dy, 'герой')).fetchall()
+
                 con.commit()
                 con.close()
+
+                self.death = True
+
 
             # запоминаем старую позицию
             self.last_position = self.position

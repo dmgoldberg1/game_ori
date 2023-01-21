@@ -22,8 +22,9 @@ pygame.mixer.music.load('data\\music\\Мощная Эпическая Музык
 
 music_play = False
 pygame.mixer.music.play(-1)
-# pygame.mixer.music.stop()
 
+
+# pygame.mixer.music.stop()
 
 
 # рабочие классы/функции
@@ -244,63 +245,63 @@ def generate_level(l, number):
                 elif level[y][x] == '^':
                     a = Platform(all_sprites, platform_sprites, (x, y))
                     print((a.rect.x, a.rect.y))
-                    enemy1 = Boss(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
-    elif number == 1:
-        for y in range(len(level)):
-            for x in range(len(level[y])):
-                x_1 = x + count
-                if level[y][x] == '.':
-                    continue
-                elif level[y][x] == '-':
-                    Platform(all_sprites, platform_sprites1, (x_1, y))
-                elif level[y][x] == '|':
-                    PlatformVertical(all_sprites, platform_sprites1, (x_1, y))
-                elif level[y][x] == '(':
-                    PlatformSlippery(all_sprites, platform_sprites1, (x_1, y))
-                elif level[y][x] == '/':
-                    PlatformFire(all_sprites, platform_sprites1, (x_1, y))
-                elif level[y][x] == '_':
-                    a = Platform(all_sprites, platform_sprites1, (x_1, y))
-                    print((a.rect.x, a.rect.y))
-                    enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites1, a, main_hero)
-    elif number == 2:
-        count *= 2
-        for y in range(len(level)):
-            for x in range(len(level[y])):
-                x_1 = x + count
-                if level[y][x] == '.':
-                    continue
-                elif level[y][x] == '-':
-                    Platform(all_sprites, platform_sprites2, (x_1, y))
-                elif level[y][x] == '|':
-                    PlatformVertical(all_sprites, platform_sprites2, (x_1, y))
-                elif level[y][x] == '(':
-                    PlatformSlippery(all_sprites, platform_sprites2, (x_1, y))
-                elif level[y][x] == '/':
-                    PlatformFire(all_sprites, platform_sprites2, (x_1, y))
-                elif level[y][x] == '_':
-                    a = Platform(all_sprites, platform_sprites2, (x_1, y))
-                    print((a.rect.x, a.rect.y))
-                    enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites2, a, main_hero)
-
-    elif number == 3:
-        for y in range(len(level)):
-            for x in range(len(level[y])):
-                if level[y][x] == '.':
-                    continue
-                elif level[y][x] == '-':
-                    Platform(education_sprites, education_platform_sprites, (x, y))
-                elif level[y][x] == '|':
-                    PlatformVertical(education_sprites, education_platform_sprites, (x, y))
-                elif level[y][x] == '(':
-                    PlatformSlippery(education_sprites, education_platform_sprites, (x, y))
-                elif level[y][x] == '/':
-                    PlatformFire(education_sprites, education_platform_sprites, (x, y))
-                elif level[y][x] == '_':
-                    a = Platform(education_sprites, education_platform_sprites, (x, y))
-                    print((a.rect.x, a.rect.y))
-                    enemy1 = EnemyMelee(education_sprites, education_enemy_sprites,
-                                        education_platform_sprites, a, education_main_hero)
+                    # enemy1 = Boss(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
+    # elif number == 1:
+    #     for y in range(len(level)):
+    #         for x in range(len(level[y])):
+    #             x_1 = x + count
+    #             if level[y][x] == '.':
+    #                 continue
+    #             elif level[y][x] == '-':
+    #                 Platform(all_sprites, platform_sprites1, (x_1, y))
+    #             elif level[y][x] == '|':
+    #                 PlatformVertical(all_sprites, platform_sprites1, (x_1, y))
+    #             elif level[y][x] == '(':
+    #                 PlatformSlippery(all_sprites, platform_sprites1, (x_1, y))
+    #             elif level[y][x] == '/':
+    #                 PlatformFire(all_sprites, platform_sprites1, (x_1, y))
+    #             elif level[y][x] == '_':
+    #                 a = Platform(all_sprites, platform_sprites1, (x_1, y))
+    #                 print((a.rect.x, a.rect.y))
+    #                 enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites1, a, main_hero)
+    # elif number == 2:
+    #     count *= 2
+    #     for y in range(len(level)):
+    #         for x in range(len(level[y])):
+    #             x_1 = x + count
+    #             if level[y][x] == '.':
+    #                 continue
+    #             elif level[y][x] == '-':
+    #                 Platform(all_sprites, platform_sprites2, (x_1, y))
+    #             elif level[y][x] == '|':
+    #                 PlatformVertical(all_sprites, platform_sprites2, (x_1, y))
+    #             elif level[y][x] == '(':
+    #                 PlatformSlippery(all_sprites, platform_sprites2, (x_1, y))
+    #             elif level[y][x] == '/':
+    #                 PlatformFire(all_sprites, platform_sprites2, (x_1, y))
+    #             elif level[y][x] == '_':
+    #                 a = Platform(all_sprites, platform_sprites2, (x_1, y))
+    #                 print((a.rect.x, a.rect.y))
+    #                 enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites2, a, main_hero)
+    #
+    # elif number == 3:
+    #     for y in range(len(level)):
+    #         for x in range(len(level[y])):
+    #             if level[y][x] == '.':
+    #                 continue
+    #             elif level[y][x] == '-':
+    #                 Platform(education_sprites, education_platform_sprites, (x, y))
+    #             elif level[y][x] == '|':
+    #                 PlatformVertical(education_sprites, education_platform_sprites, (x, y))
+    #             elif level[y][x] == '(':
+    #                 PlatformSlippery(education_sprites, education_platform_sprites, (x, y))
+    #             elif level[y][x] == '/':
+    #                 PlatformFire(education_sprites, education_platform_sprites, (x, y))
+    #             elif level[y][x] == '_':
+    #                 a = Platform(education_sprites, education_platform_sprites, (x, y))
+    #                 print((a.rect.x, a.rect.y))
+    #                 enemy1 = EnemyMelee(education_sprites, education_enemy_sprites,
+    #                                     education_platform_sprites, a, education_main_hero)
 
     return count * 100
 
@@ -329,6 +330,7 @@ platform_sprites2 = pygame.sprite.Group()
 main_hero_sprite = pygame.sprite.Group()
 enemy_sprites = pygame.sprite.Group()
 hp_status_group = pygame.sprite.Group()
+result = pygame.sprite.Group()
 
 education_sprites = pygame.sprite.Group()
 education_platform_sprites = pygame.sprite.Group()
@@ -341,6 +343,15 @@ settings = pygame.sprite.Group()
 
 # загружаем кнопками:
 # настройки
+# смерт
+# смерт
+Button(result, [WIDTH // 2 - 200, 250], [350, 70], 'Выйти в меню', menu)
+Button(result, [WIDTH // 2 - 200, 350], [350, 70], 'Попробовать снова', all_sprites)
+Label(result, [WIDTH // 2 - 260, 30], 'calibri', 'КОНЕЦ ИГРЫ', font_size=90)
+# Button(result, [WIDTH // 2 - 200, 250], [350, 70], 'Выйти в меню', menu)
+# Button(result, [WIDTH // 2 - 200, 150], [350, 70], 'Попробовать снова', all_sprites)
+# Label(result, [WIDTH // 2 - 170, 50], 'arial', 'КОНЕЦ ИГРЫ', font_size=50)
+
 Button(settings, [0, 0], [40, 40], '←', menu)
 
 Label(settings, [WIDTH // 2 - 320, 150], 'arial', 'Прыжок')
@@ -428,20 +439,16 @@ if __name__ == '__main__':
                     pause = True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 bullet = Bullet(0, 0, main_hero.position.x,
-                                        main_hero.position.y,
-                                        all_sprites, platform_sprites, False)
+                                main_hero.position.y,
+                                all_sprites, platform_sprites, False)
                 bullets_hero.append(bullet)
                 bullet.kill()
-
 
             # карта (игра замерзает)
             if event.type == pygame.KEYDOWN and event.key == main_hero.get_from_db('Карта') and \
                     active_sprites == all_sprites and skill_check('заморозка времени'):
-                size = WIDTH, HEIGHT = ((2000, 1000) if size != (2000, 1000) else (1000, 600))
                 for i in enemy_sprites:
                     i.pause = True if not i.pause else False
-
-                pygame.display.set_mode(size)
 
             # обновление спрайтов
             active_sprites.update(event)
@@ -497,7 +504,6 @@ if __name__ == '__main__':
                 screen.blit(npc_ded.text_surface, (430, 50))
                 activate_skill('двойной прыжок')
 
-
         # работа с координатами
         if not main_hero.allow and active_sprites == all_sprites:
             all_sprites.update(null_object.rect.x, null_object.rect.y)
@@ -536,8 +542,6 @@ if __name__ == '__main__':
                         # print(f'''Герой: {main_hero.rect.x}, Пуля: {int(bullet.pos[0] // 1)}''')
                     for bullet in bullets:
                         bullet.draw(screen)
-
-
 
                         # print(bullets)
                         # print(sprite_distance(main_hero.rect, bullet.rect, 150))
@@ -603,6 +607,11 @@ if __name__ == '__main__':
         if active_sprites == all_sprites:
             hp_status.image.set_alpha((10 - main_hero.hp) * 10)
             hp_status_group.draw(screen)
+        if main_hero.death:
+            temp = Label(result, [WIDTH // 2 - 400, 130], 'calibri',
+                         'Пройдено за ' + str(pygame.time.get_ticks() // 1000) + ' секунд(ы)', font_size=80)
+            active_sprites = result
+            main_hero.death = False
         pygame.display.flip()
 
     # сохраняем позицию игрока
