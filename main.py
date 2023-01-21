@@ -18,15 +18,12 @@ from utilities import Background, sprite_distance, load_image, activate_skill, s
 
 # музыка
 pygame.mixer.pre_init(44100, -16, 1, 512)
-pygame.mixer.music.load('data\\music\\Мощная Эпическая Музыка _ The BEST Epic Music (256  kbps).mp3')
+pygame.mixer.music.load('data\\music\\music.mp3')
 
 music_play = False
 pygame.mixer.music.play(-1)
 
-
-# pygame.mixer.music.set_volume()
-
-
+pygame.mixer.music.set_volume(0.5)
 # pygame.mixer.music.stop()
 
 
