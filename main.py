@@ -244,7 +244,7 @@ def generate_level(l, number):
                 elif level[y][x] == '^':
                     a = Platform(all_sprites, platform_sprites, (x, y))
                     print((a.rect.x, a.rect.y))
-                    enemy1 = Boss(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
+                    #enemy1 = Boss(all_sprites, enemy_sprites, platform_sprites, a, main_hero)
     elif number == 1:
         for y in range(len(level)):
             for x in range(len(level[y])):
@@ -542,7 +542,7 @@ if __name__ == '__main__':
                         # print(bullets)
                         # print(sprite_distance(main_hero.rect, bullet.rect, 150))
 
-                    if not fire and pygame.time.get_ticks() - bullet.fire_timer >= 5000:
+                    if not fire and pygame.time.get_ticks() - bullet.fire_timer >= 4000:
                         fire = True
                         bullet.fire_timer = 0
                 for bullet in bullets_hero[:]:
@@ -563,16 +563,16 @@ if __name__ == '__main__':
             # print(main_hero.hp)
 
             # Стрельба летающих нпс
+        if not pause:
+            for bullet in bullets_hero[:]:
+                bullet.update()
 
-        for bullet in bullets_hero[:]:
-            bullet.update()
+                if not screen.get_rect().collidepoint(bullet.pos):
+                    bullets_hero.remove(bullet)
+                # print(f'''Герой: {main_hero.rect.x}, Пуля: {int(bullet.pos[0] // 1)}''')
 
-            if not screen.get_rect().collidepoint(bullet.pos):
-                bullets_hero.remove(bullet)
-            # print(f'''Герой: {main_hero.rect.x}, Пуля: {int(bullet.pos[0] // 1)}''')
-
-        for bullet in bullets_hero:
-            bullet.draw(screen)
+            for bullet in bullets_hero:
+                bullet.draw(screen)
         active_sprites.update()
 
         # если экран игры
