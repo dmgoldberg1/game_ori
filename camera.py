@@ -1,4 +1,4 @@
-from platform import Platform, PlatformSlippery, PlatformMove, PlatformFire
+from platform import Platform, PlatformSlippery, PlatformFire
 
 WIDTH, HEIGHT = 1000, 600
 
@@ -17,7 +17,7 @@ class Camera:
     def apply(self, obj):
         # print(type(obj))
         if type(obj) == Platform or type(obj) == PlatformSlippery or \
-                type(obj) == PlatformFire or type(obj) == PlatformMove:
+                type(obj) == PlatformFire:
             obj.rect.x += self.dx
             obj.rect.y += self.dy
         else:

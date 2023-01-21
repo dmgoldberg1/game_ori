@@ -14,11 +14,32 @@ from nullobject import Null_Object
 # import pygame_ai as pai
 # классы-работники
 from platform import Platform, PlatformSlippery, PlatformFire, PlatformVertical
-from utilities import Background, sprite_distance
+from utilities import Background, sprite_distance, load_image, activate_skill, skill_check
+
+# музыка
+pygame.mixer.pre_init(44100, -16, 1, 512)
+pygame.mixer.music.load('data\\music\\Мощная Эпическая Музыка _ The BEST Epic Music (256  kbps).mp3')
+
+music_play = False
+pygame.mixer.music.play(-1)
+# pygame.mixer.music.stop()
+
 
 
 # рабочие классы/функции
 ########################################################################################################################
+
+class Hp_status(pygame.sprite.Sprite):
+    def __init__(self, group):
+        pygame.sprite.Sprite.__init__(self, group)
+        self.image = load_image("animation\\hp_status.png", colorkey=(255, 255, 255))
+        self.image = pygame.transform.scale(self.image, (WIDTH, HEIGHT))
+        self.image = self.image.convert()
+        # self.image.set_colorkey(-1, RLEACCEL)
+        self.image.set_alpha(50)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 2, HEIGHT // 2)
+
 
 # кнопка
 class Button(pygame.sprite.Sprite):
@@ -160,11 +181,11 @@ class LoadCover(pygame.sprite.Sprite):
         f1 = pygame.font.SysFont('arial', 60)
         text1 = f1.render('Загрузка...' + ('.' * self.dots), True, pygame.Color("white"))
 
-        self.size = [1000, 600]
+        self.size = [WIDTH, HEIGHT]
         self.image = pygame.Surface(self.size)
         self.image.fill((0, 0, 0))
 
-        self.image.blit(text1, (600 - text1.get_width(), 300 - text1.get_height()))
+        self.image.blit(text1, ((WIDTH - text1.get_width()) // 2, (HEIGHT - text1.get_height()) // 2))
 
         # координаты
         self.rect = self.image.get_rect()
@@ -202,6 +223,8 @@ def generate_level(l, number):
                     continue
                 elif level[y][x] == '-':
                     Platform(all_sprites, platform_sprites, (x, y))
+                elif level[y][x] == '|':
+                    PlatformVertical(all_sprites, platform_sprites, (x, y))
                 elif level[y][x] == '(':
                     PlatformSlippery(all_sprites, platform_sprites, (x, y))
                 elif level[y][x] == '/':
@@ -213,7 +236,7 @@ def generate_level(l, number):
                 elif level[y][x] == '$':
                     a = Platform(all_sprites, platform_sprites, (x, y))
                     print((a.rect.x, a.rect.y))
-                    npc_ded = NPC(all_sprites, (a.rect.x + 10, a.rect.y  - 40), 'Ты встретил деда!')
+                    npc_ded = NPC(all_sprites, (a.rect.x + 10, a.rect.y - 40), 'Ты встретил деда!')
                 elif level[y][x] == '+':
                     a = Platform(all_sprites, platform_sprites, (x, y))
                     print((a.rect.x, a.rect.y))
@@ -230,6 +253,8 @@ def generate_level(l, number):
                     continue
                 elif level[y][x] == '-':
                     Platform(all_sprites, platform_sprites1, (x_1, y))
+                elif level[y][x] == '|':
+                    PlatformVertical(all_sprites, platform_sprites1, (x_1, y))
                 elif level[y][x] == '(':
                     PlatformSlippery(all_sprites, platform_sprites1, (x_1, y))
                 elif level[y][x] == '/':
@@ -247,6 +272,8 @@ def generate_level(l, number):
                     continue
                 elif level[y][x] == '-':
                     Platform(all_sprites, platform_sprites2, (x_1, y))
+                elif level[y][x] == '|':
+                    PlatformVertical(all_sprites, platform_sprites2, (x_1, y))
                 elif level[y][x] == '(':
                     PlatformSlippery(all_sprites, platform_sprites2, (x_1, y))
                 elif level[y][x] == '/':
@@ -255,6 +282,26 @@ def generate_level(l, number):
                     a = Platform(all_sprites, platform_sprites2, (x_1, y))
                     print((a.rect.x, a.rect.y))
                     enemy1 = EnemyMelee(all_sprites, enemy_sprites, platform_sprites2, a, main_hero)
+
+    elif number == 3:
+        for y in range(len(level)):
+            for x in range(len(level[y])):
+                if level[y][x] == '.':
+                    continue
+                elif level[y][x] == '-':
+                    Platform(education_sprites, education_platform_sprites, (x, y))
+                elif level[y][x] == '|':
+                    PlatformVertical(education_sprites, education_platform_sprites, (x, y))
+                elif level[y][x] == '(':
+                    PlatformSlippery(education_sprites, education_platform_sprites, (x, y))
+                elif level[y][x] == '/':
+                    PlatformFire(education_sprites, education_platform_sprites, (x, y))
+                elif level[y][x] == '_':
+                    a = Platform(education_sprites, education_platform_sprites, (x, y))
+                    print((a.rect.x, a.rect.y))
+                    enemy1 = EnemyMelee(education_sprites, education_enemy_sprites,
+                                        education_platform_sprites, a, education_main_hero)
+
     return count * 100
 
 
@@ -281,6 +328,11 @@ platform_sprites1 = pygame.sprite.Group()
 platform_sprites2 = pygame.sprite.Group()
 main_hero_sprite = pygame.sprite.Group()
 enemy_sprites = pygame.sprite.Group()
+hp_status_group = pygame.sprite.Group()
+
+education_sprites = pygame.sprite.Group()
+education_platform_sprites = pygame.sprite.Group()
+education_enemy_sprites = pygame.sprite.Group()
 
 # меню
 about = pygame.sprite.Group()
@@ -306,7 +358,7 @@ KeyRegister(settings, [WIDTH // 2 - 200, 330], 'Вправо')
 Label(menu, [WIDTH // 2 - 380, 50], 'Comic Sans MS', 'ЗАБАВНЫЕ ПРИКЛЮЧЕНИЯ', font_size=50)
 
 Button(menu, [WIDTH // 2 - 200, 150], [350, 70], 'Играть', all_sprites)
-Button(menu, [WIDTH // 2 - 200, 250], [350, 70], 'Обучение', all_sprites)
+Button(menu, [WIDTH // 2 - 200, 250], [350, 70], 'Обучение', education_sprites)
 Button(menu, [WIDTH // 2 - 200, 350], [350, 70], 'Настройки', settings)
 Button(menu, [WIDTH // 2 - 200, 450], [350, 70], 'Об игре', about)
 Button(menu, [0, 0], [40, 40], '←')
@@ -316,17 +368,21 @@ Button(about, [0, 0], [40, 40], '←', menu)
 Label(about, [60, 10], 'arial', 'ВСТАВИТЬ ОПИСАНИЕ (ctrl+c, ctrl+v из презентации) :)', font_size=30)
 # игру
 button_in_game = Button(all_sprites, [0, 0], [40, 40], '←', menu)
+ed_button = Button(education_sprites, [0, 0], [40, 40], '←', menu)
 
 # активное окно
 active_sprites = menu
 # gravity_entities = []
 # drag = pai.steering.kinematic.Drag(15)
-# герой, уровень
 
+# герой, уровень
+hp_status = Hp_status(hp_status_group)
 null_object = Null_Object(all_sprites)
+education_null_object = Null_Object(education_sprites)
 
 load_cover = LoadCover(all_sprites)
 main_hero = MainHero(all_sprites, [platform_sprites], null_object)
+education_main_hero = MainHero(education_sprites, [education_platform_sprites], education_null_object)
 all_sprites.remove(load_cover)
 
 # npc = NPC(all_sprites, (2300, 100), 'Ты встретил деда!')
@@ -335,6 +391,7 @@ tick = clock.tick(60) / 1000
 board1 = generate_level(load_level('map.txt', 0), 0)
 board2 = generate_level(load_level('map2.txt', 1), 1) * 2
 board3 = generate_level(load_level('map3.txt', 2), 2) * 2
+education_board = generate_level(load_level('map_education.txt', 0), 3)
 print(board1, board2, board3)
 
 npc_visited = False
@@ -347,6 +404,7 @@ test = True
 check = 1
 # камера
 camera = Camera(WIDTH, HEIGHT, main_hero)
+education_camera = Camera(WIDTH, HEIGHT, education_main_hero)
 
 # симуляция
 ########################################################################################################################
@@ -377,14 +435,13 @@ if __name__ == '__main__':
 
 
             # карта (игра замерзает)
-            if event.type == pygame.KEYDOWN and event.key == main_hero.get_from_db('Карта'):
-                size = ((2000, 1000) if size != (2000, 1000) else (1000, 600))
-                main_hero.pause = True if not main_hero.pause else False
+            if event.type == pygame.KEYDOWN and event.key == main_hero.get_from_db('Карта') and \
+                    active_sprites == all_sprites and skill_check('заморозка времени'):
+                size = WIDTH, HEIGHT = ((2000, 1000) if size != (2000, 1000) else (1000, 600))
                 for i in enemy_sprites:
                     i.pause = True if not i.pause else False
 
                 pygame.display.set_mode(size)
-                os.environ['Sp_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 0)
 
             # обновление спрайтов
             active_sprites.update(event)
@@ -393,16 +450,20 @@ if __name__ == '__main__':
         screen.fill((255, 255, 255))
 
         # обрабатываем границы
-        if board1 - 200 <= main_hero.rect.x - null_object.rect.x <= board1 + 200 and len(main_hero.platform_sprite_group) == 1:
+        if board1 - 200 <= main_hero.rect.x - null_object.rect.x <= board1 + 200 and len(
+                main_hero.platform_sprite_group) == 1:
             main_hero.platform_sprite_group.append(platform_sprites1)
             print('aaaaaaaaa')
-        elif board2 - 200 <= main_hero.rect.x - null_object.rect.x <= board2 + 200 and len(main_hero.platform_sprite_group) == 2:
-            main_hero.platform_sprite_group.append(platform_sprites2) #.append(platform_sprites2)
+        elif board2 - 200 <= main_hero.rect.x - null_object.rect.x <= board2 + 200 and len(
+                main_hero.platform_sprite_group) == 2:
+            main_hero.platform_sprite_group.append(platform_sprites2)  # .append(platform_sprites2)
             print('aaaaaaaaa')
-        elif board1 + 200 <= main_hero.rect.x - null_object.rect.x <= board2 - 200 and len(main_hero.platform_sprite_group) == 2:
+        elif board1 + 200 <= main_hero.rect.x - null_object.rect.x <= board2 - 200 and len(
+                main_hero.platform_sprite_group) == 2:
             main_hero.platform_sprite_group = [platform_sprites1]
             print('bbbbbbbbbbbb')
-        elif board2 + 200 <= main_hero.rect.x - null_object.rect.x <= board3 - 200 and len(main_hero.platform_sprite_group) == 2:
+        elif board2 + 200 <= main_hero.rect.x - null_object.rect.x <= board3 - 200 and len(
+                main_hero.platform_sprite_group) == 2:
             main_hero.platform_sprite_group = main_hero.platform_sprite_group[1:]
             print('bbbbbbbbbbbb')
 
@@ -434,6 +495,8 @@ if __name__ == '__main__':
             # если персонаж сейчас посещает нпс
             if npc_ded.npc_visit:
                 screen.blit(npc_ded.text_surface, (430, 50))
+                activate_skill('двойной прыжок')
+
 
         # работа с координатами
         if not main_hero.allow and active_sprites == all_sprites:
@@ -442,6 +505,7 @@ if __name__ == '__main__':
             # натянуть 'загрузку'
             if load_cover not in all_sprites:
                 load_cover = LoadCover(all_sprites)
+                print(load_cover.size)
         else:
             active_sprites.update()
 
@@ -519,12 +583,26 @@ if __name__ == '__main__':
 
             # обновляем положение всех спрайтов
             for sprite in all_sprites:
+                # print(type(sprite) if type(sprite) != Platform else 0)
                 if sprite != button_in_game and sprite != load_cover:
                     camera.apply(sprite)
             main_hero.last_position = main_hero.rect
             main_hero.position = main_hero.rect
+            # print('dddddddddddddddddd')
+
+        elif active_sprites == education_sprites:
+            education_camera.update(education_main_hero)
+            # обновляем положение всех спрайтов
+            for sprite in education_sprites:
+                if sprite != ed_button:
+                    education_camera.apply(sprite)
+            education_main_hero.last_position = education_main_hero.rect
+            education_main_hero.position = education_main_hero.rect
 
         active_sprites.draw(screen)
+        if active_sprites == all_sprites:
+            hp_status.image.set_alpha((10 - main_hero.hp) * 10)
+            hp_status_group.draw(screen)
         pygame.display.flip()
 
     # сохраняем позицию игрока
