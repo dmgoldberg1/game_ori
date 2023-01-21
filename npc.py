@@ -51,6 +51,7 @@ class EnemyMelee(pygame.sprite.Sprite):
         self.vel.x = random.randint(2, 6) / 2  # Randomized velocity of the generated enemy
         self.vel.y = -20
         self.gravity = 2
+        self.hp = 5
 
         # константы для платформ
         self.platform = platform
@@ -81,6 +82,8 @@ class EnemyMelee(pygame.sprite.Sprite):
                 # elif self.platform.rect.x + self.platform.rect.w - 10 <= self.position.x <= self.platform.rect.x + self.platform.rect.w:
                 #     self.direction = 1
                 #     self.rect.x += self.vel.x
+                if self.hp <= 0:
+                    self.kill()
 
                 if s < 500:
                     if round(self.main_hero_pos.x + self.main_hero_pos.w // 2) == round(self.position.x):
@@ -160,6 +163,7 @@ class EnemyMelee(pygame.sprite.Sprite):
                         self.main_hero.hit = False
                         self.main_hero.hit_timer = 0
 
+
                 # self.rect.center = self.pos  # Updates
 
 
@@ -183,6 +187,7 @@ class EnemyRangeFly(pygame.sprite.Sprite):
         self.last_position = pygame.Rect(self.rect)
         self.state = {'на земле': True,
                       'карабкается': False}
+        self.hp = 5
         self.add(special_group)
 
     def update(self, *args):
@@ -193,10 +198,11 @@ class EnemyRangeFly(pygame.sprite.Sprite):
                 # print(s)
 
                 self.position = pygame.Rect(self.rect)
+                if self.hp <= 0:
+                    self.kill()
 
                 if s < 500:
-                    print('S po x',
-                          abs(round(self.main_hero_pos.x + self.main_hero_pos.w // 2) - round(self.position.x)))
+
                     if abs(round(self.main_hero_pos.x + self.main_hero_pos.w // 2) - round(self.position.x)) <= 200:
                         self.vel.x = 0
                     elif self.main_hero_pos.x + self.main_hero_pos.w // 2 < self.position.x:
@@ -205,8 +211,7 @@ class EnemyRangeFly(pygame.sprite.Sprite):
                     else:
                         self.vel.x = random.randint(4, 8) / 2
 
-                    print('S po y',
-                          abs(round(self.main_hero_pos.y + self.main_hero_pos.h // 2) - round(self.position.y)))
+
                     if abs(round(self.main_hero_pos.y + self.main_hero_pos.h // 2) - round(self.position.y)) <= 200:
                         self.vel.y = 0
                     elif self.main_hero_pos.y + self.main_hero_pos.h // 2 < self.position.y:
@@ -333,11 +338,12 @@ class EnemyRangeFly(pygame.sprite.Sprite):
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x_enemy, y_enemy, x_hero, y_hero, group, platform_sprite_group):
+    def __init__(self, x_enemy, y_enemy, x_hero, y_hero, group, platform_sprite_group, status=False):
         super().__init__(group)
         self.platform_sprite_group = platform_sprite_group
         self.image = load_image('temp.png')
         self.pause = False
+        self.status = status
         self.rect = self.image.get_rect()
 
         self.last_position = pygame.Rect(self.rect)
@@ -346,11 +352,17 @@ class Bullet(pygame.sprite.Sprite):
         self.state = {'на земле': True,
                       'карабкается': False}
 
-        self.pos = (x_enemy, y_enemy)
+        if self.status:
+            self.pos = (x_enemy, y_enemy)
+            mx, my = x_hero, y_hero
+            self.dir = (mx - x_enemy, my - y_enemy)
+        else:
+            self.pos = (x_hero, y_hero)
+            mx, my = pygame.mouse.get_pos()
+            self.dir = (mx - x_hero, my - y_hero)
         self.rect.x = self.pos[0]
         self.rect.y = self.pos[1]
-        mx, my = x_hero, y_hero
-        self.dir = (mx - x_enemy, my - y_enemy)
+
         length = math.hypot(*self.dir)
         self.fire = False
         self.fire_timer = 0
@@ -367,104 +379,12 @@ class Bullet(pygame.sprite.Sprite):
 
     def update(self, *args):
         # print('ПАУЗА', self.pause)
-        if not self.pause:
-            if not args:
-                self.pos = (self.pos[0] + self.dir[0] * self.speed,
-                            self.pos[1] + self.dir[1] * self.speed)
-                for i in self.platform_sprite_group:
-                    # print(i.mask.get_bounding_rects()[0])
-                    a, b, c, d = i.mask.get_bounding_rects()[0][:4]
-                    platform_rect = pygame.Rect(i.rect[0] + a, i.rect[1] + b + 5, c, d)
+        self.pos = (self.pos[0] + self.dir[0] * self.speed,
+                    self.pos[1] + self.dir[1] * self.speed)
 
-                    # линия пересечения персонажа по 4 направлениям
-                    down_hero_line_left = ((self.position.left, self.position.bottom),
-                                           (self.last_position.left, self.last_position.bottom))
-                    down_hero_line_right = ((self.position.right, self.position.bottom),
-                                            (self.last_position.right, self.last_position.bottom))
-                    top_hero_line_left = ((self.position.left, self.position.top),
-                                          (self.last_position.left, self.last_position.top))
-                    top_hero_line_right = ((self.position.right, self.position.top),
-                                           (self.last_position.right, self.last_position.top))
-
-                    # поиск пересечения персонажем по 4 углам
-                    collide_down_left = platform_rect.clipline(down_hero_line_left)
-                    collide_down_right = platform_rect.clipline(down_hero_line_right)
-                    collide_top_left = platform_rect.clipline(top_hero_line_left)
-                    collide_top_right = platform_rect.clipline(top_hero_line_right)
-
-                    if collide_down_right:
-                        print('d_r')
-                        if self.state['на земле']:
-                            pass
-                            # self.kill()
-                        if not platform_rect.collidepoint(self.last_position.right, self.last_position.bottom):
-                            # print(collide_down_right)
-                            # self.kill()
-                            self.state['на земле'] = True
-                            x = max(collide_down_right[0][0], collide_down_right[-1][0])
-                            y = min(collide_down_right[0][1], collide_down_right[-1][1])
-                            self.rect = self.rect.move(x - self.rect.x - self.rect.width,
-                                                       (y - self.rect.height - self.rect.y))
-
-                    # обработка пересечения с низом - левом персонажа
-                    if collide_down_left:
-                        print('d_l')
-                        if self.state['на земле']:
-                            pass
-                            # self.kill()
-                        if not platform_rect.collidepoint(self.last_position.left, self.last_position.bottom):
-                            # print(collide_down_left)
-                            # self.kill()
-                            self.state['на земле'] = True
-                            x = min(collide_down_left[0][0], collide_down_left[-1][0])
-                            y = min(collide_down_left[0][1], collide_down_left[-1][1])
-                            self.rect = self.rect.move(x - self.rect.x,
-                                                       (y - self.rect.height - self.rect.y))
-
-                    # обработка пересечения с верхом - правом персонажа
-                    if collide_top_right:
-                        print('t_r')
-                        # врезается в потолок, стоя на земле
-                        if self.state['на земле']:
-                            # print(collide_top_right)
-                            # self.kill()
-                            x = min(collide_top_right[0][0], collide_top_right[-1][0])
-                            y = max(collide_top_right[0][1], collide_top_right[-1][1])
-                            self.rect = self.rect.move(x - self.rect.x - self.rect.width - 1,
-                                                       (y - self.rect.y))
-                        # врезается в потолок, в воздухе
-                        elif not platform_rect.collidepoint(self.last_position.right, self.last_position.top):
-                            # print(collide_top_right)
-                            self.state['на земле'] = False
-                            # self.kill()
-                            x = min(collide_top_right[0][0], collide_top_right[-1][0])
-                            y = max(collide_top_right[0][1], collide_top_right[-1][1])
-                            self.rect = self.rect.move(x - self.rect.x - self.rect.width,
-                                                       (y - self.rect.y + 1))
-
-                    # обработка пересечения с верхом - левом персонажа
-                    if collide_top_left:
-                        print('t_l')
-                        # врезается в потолок, стоя на земле
-                        if self.state['на земле']:
-                            # print(collide_top_left)
-                            # self.kill()
-                            x = max(collide_top_left[0][0], collide_top_left[-1][0])
-                            y = max(collide_top_left[0][1], collide_top_left[-1][1])
-                            self.rect = self.rect.move(x - self.rect.x + 1,
-                                                       (y - self.rect.y))
-                        # врезается в потолок, в воздухе
-                        elif not platform_rect.collidepoint(self.last_position.left, self.last_position.top):
-                            print(collide_top_left)
-                            self.state['на земле'] = False
-                            # dddself.kill()
-                            x = max(collide_top_left[0][0], collide_top_left[-1][0])
-                            y = max(collide_top_left[0][1], collide_top_left[-1][1])
-                            self.rect = self.rect.move(x - self.rect.x,
-                                                       (y - self.rect.y + 1))
 
                     # обновление позиции
-                    self.position = pygame.Rect(self.rect)
+
 
     def draw(self, surf):
         bullet_rect = self.image.get_rect(center=self.pos)
@@ -493,6 +413,7 @@ class Boss(pygame.sprite.Sprite):
         #self.vel.x = 0
         self.vel.y = -20
         self.gravity = 2
+        self.hp = 5
 
         # константы для платформ
         self.platform = platform
@@ -519,6 +440,8 @@ class Boss(pygame.sprite.Sprite):
                 # print(s)
 
                 self.position = pygame.Rect(self.rect)
+                if self.hp <= 0:
+                    self.kill()
                 # if self.platform.rect.x <= self.position.x <= self.platform.rect.x + 10:
                 #     self.direction = 0
                 # elif self.platform.rect.x + self.platform.rect.w - 10 <= self.position.x <= self.platform.rect.x + self.platform.rect.w:
@@ -598,5 +521,12 @@ class Boss(pygame.sprite.Sprite):
                 if pygame.sprite.collide_mask(self, self.main_hero):
                     # print('aaaaaaa')
                     self.main_hero.hp -= 1
+                    self.main_hero.hit = True
+                    self.main_hero.hit_timer = pygame.time.get_ticks()
+
+                if self.main_hero.hit:
+                    if pygame.time.get_ticks() - self.main_hero.hit_timer >= 1000:
+                        self.main_hero.hit = False
+                        self.main_hero.hit_timer = 0
 
                 # self.rect.center = self.pos  # Updates
