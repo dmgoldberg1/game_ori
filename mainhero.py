@@ -44,10 +44,10 @@ class MainHero(pygame.sprite.Sprite):
                       'карабкается': False}
 
         # работа с анимацией
-        self.moving_statuses = {'straight': [True, 'animation\\mainhero\\straight2\\', 12],
-                                'left': [True, 'animation\\mainhero\\left2\\', 8],
-                                'right': [True, 'animation\\mainhero\\right2\\', 8]}
-        self.image = load_image("animation\\mainhero\\straight2\\1.png")
+        self.moving_statuses = {'straight': [True, 'animation\\mainhero2\\mainhero\\straight\\', 12],
+                                'left': [True, 'animation\\mainhero2\\mainhero\\left\\', 8],
+                                'right': [True, 'animation\\mainhero2\\mainhero\\right\\', 8]}
+        self.image = load_image("animation\\mainhero2\\mainhero\\straight\\1.png")
         print('aaeaa', self.image.get_rect())
         self.image = pygame.transform.scale(self.image, (50, 75))
         self.animation_counter = 1
