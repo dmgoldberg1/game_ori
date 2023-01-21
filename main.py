@@ -449,9 +449,9 @@ if __name__ == '__main__':
             if event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
                 print('MOUSE', pos)
-                if 306 <= pos[0] <= 643:
+                if active_sprites == all_sprites: #306 <= pos[0] <= 643 and
                     pause = False
-                if 5 <= pos[0] <= 35:
+                else: # 5 <= pos[0] <= 35
                     pause = True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if fire_hero:

@@ -341,7 +341,8 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self, x_enemy, y_enemy, x_hero, y_hero, group, platform_sprite_group, status=False):
         super().__init__(group)
         self.platform_sprite_group = platform_sprite_group
-        self.image = load_image('temp.png')
+        self.image = load_image('animation\\bullet.png', colorkey=(255, 255, 255))
+        self.image = pygame.transform.scale(self.image, (10, 10))
         self.pause = False
         self.status = status
         self.rect = self.image.get_rect()
