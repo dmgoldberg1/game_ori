@@ -14,7 +14,7 @@ from nullobject import Null_Object
 # import pygame_ai as pai
 # классы-работники
 from platform import Platform, PlatformSlippery, PlatformFire, PlatformVertical
-from utilities import Background, sprite_distance, load_image
+from utilities import Background, sprite_distance, load_image, activate_skill, skill_check
 
 # музыка
 pygame.mixer.pre_init(44100, -16, 1, 512)
@@ -181,11 +181,11 @@ class LoadCover(pygame.sprite.Sprite):
         f1 = pygame.font.SysFont('arial', 60)
         text1 = f1.render('Загрузка...' + ('.' * self.dots), True, pygame.Color("white"))
 
-        self.size = [1000, 600]
+        self.size = [WIDTH, HEIGHT]
         self.image = pygame.Surface(self.size)
         self.image.fill((0, 0, 0))
 
-        self.image.blit(text1, (600 - text1.get_width(), 300 - text1.get_height()))
+        self.image.blit(text1, ((WIDTH - text1.get_width()) // 2, (HEIGHT - text1.get_height()) // 2))
 
         # координаты
         self.rect = self.image.get_rect()
@@ -423,14 +423,13 @@ if __name__ == '__main__':
                     pause = True
 
             # карта (игра замерзает)
-            if event.type == pygame.KEYDOWN and event.key == main_hero.get_from_db('Карта'):
-                size = ((2000, 1000) if size != (2000, 1000) else (1000, 600))
-                main_hero.pause = True if not main_hero.pause else False
+            if event.type == pygame.KEYDOWN and event.key == main_hero.get_from_db('Карта') and \
+                    active_sprites == all_sprites and skill_check('заморозка времени'):
+                size = WIDTH, HEIGHT = ((2000, 1000) if size != (2000, 1000) else (1000, 600))
                 for i in enemy_sprites:
                     i.pause = True if not i.pause else False
 
                 pygame.display.set_mode(size)
-                os.environ['Sp_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 0)
 
             # обновление спрайтов
             active_sprites.update(event)
@@ -484,6 +483,8 @@ if __name__ == '__main__':
             # если персонаж сейчас посещает нпс
             if npc_ded.npc_visit:
                 screen.blit(npc_ded.text_surface, (430, 50))
+                activate_skill('двойной прыжок')
+
 
         # работа с координатами
         if not main_hero.allow and active_sprites == all_sprites:
@@ -492,6 +493,7 @@ if __name__ == '__main__':
             # натянуть 'загрузку'
             if load_cover not in all_sprites:
                 load_cover = LoadCover(all_sprites)
+                print(load_cover.size)
         else:
             active_sprites.update()
 
@@ -551,8 +553,6 @@ if __name__ == '__main__':
             main_hero.last_position = main_hero.rect
             main_hero.position = main_hero.rect
             # print('dddddddddddddddddd')
-
-
 
         elif active_sprites == education_sprites:
             education_camera.update(education_main_hero)

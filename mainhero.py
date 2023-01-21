@@ -3,7 +3,7 @@ import sqlite3
 import pygame
 from data import timer_npc
 from nullobject import Null_Object
-from utilities import load_image
+from utilities import load_image, skill_check
 
 # музыка
 pygame.mixer.pre_init(44100, -16, 1, 512)
@@ -62,6 +62,7 @@ class MainHero(pygame.sprite.Sprite):
         self.pause = False
         self.allow = False
         self.null_object = null_object
+        self.jump_count = 1 + skill_check('двойной прыжок')
 
         # игровые моменты
         self.allow = False
@@ -184,10 +185,11 @@ class MainHero(pygame.sprite.Sprite):
             if args[0].type == pygame.KEYDOWN and timer_npc[0]:
                 self.continue_moving_x = True
 
-                if self.state['на земле']:
+                if self.jump_count:
                     if args[0].key in self.ud_buttons:
                         self.y_vel = -33
                         self.state['на земле'] = False
+                        self.jump_count -= 1
 
                 if args[0].key in self.lr_buttons:
                     self.x_vel = self.lr_buttons[args[0].key]
@@ -360,6 +362,7 @@ class MainHero(pygame.sprite.Sprite):
                                           platform_rect.collidepoint(self.position.right, self.position.bottom)])
             if any(filter(lambda x: x[1] or x[2], platforms)):
                 self.state['на земле'] = True
+                self.jump_count = 1 + skill_check('двойной прыжок')
             else:
                 self.state['на земле'] = False
 

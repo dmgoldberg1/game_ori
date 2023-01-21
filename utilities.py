@@ -40,6 +40,7 @@ def sprite_distance(rect1, rect2, dist):
     else:
         return False
 
+
 def move_to_the_point(obj, db_tag):
     con = sqlite3.connect(os.path.join('data', 'storage.db'))
     cur = con.cursor()
@@ -47,6 +48,22 @@ def move_to_the_point(obj, db_tag):
     con.close()
 
     obj.rect = obj.rect.move(*result[0])
-    print(obj.rect)
 
-    
+
+def skill_check(skill_name):
+    con = sqlite3.connect(os.path.join('data', 'storage.db'))
+    cur = con.cursor()
+    result = cur.execute("""SELECT is_active FROM skills WHERE skill_name = ?""", (skill_name,)).fetchall()[0][0]
+    con.close()
+
+    return bool(result)
+
+
+def activate_skill(skill_name):
+    con = sqlite3.connect(os.path.join('data', 'storage.db'))
+    cur = con.cursor()
+
+    result = cur.execute("""UPDATE skills SET is_active = ? WHERE skill_name = ?""",
+                         (1, skill_name)).fetchall()
+    con.commit()
+    con.close()
