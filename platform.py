@@ -1,5 +1,5 @@
 import pygame
-from new import MainHero
+from mainhero import MainHero
 from utilities import load_image
 
 # настройки окна
