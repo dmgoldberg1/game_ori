@@ -37,12 +37,5 @@ class Camera:
         else:
             self.dx = 0
             self.dy = 0
-
-        if not (0 <= self.main_hero_position.x <= self.width and
-                0 <= self.main_hero_position.y <= self.height):
-            pass
-            # print('a')
-            # print(self.main_hero_position)
-            # print('a')
         # print(self.dx, self.dy)
         self.main_hero_last_position = target.rect
