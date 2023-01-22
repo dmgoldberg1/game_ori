@@ -1,12 +1,20 @@
+# импорты:
+# работа с БД
 import os
 import sqlite3
+# структура игры
 import pygame
+# камера
 from camera import Camera
+# неиграбельные персонажи
 from data import timer_npc
-from mainhero import MainHero
 from npc import NPC, EnemyMelee, EnemyRangeFly, Bullet, Boss
+# главный герой
+from mainhero import MainHero
 from nullobject import Null_Object
+# платформы
 from platform1 import Platform, PlatformSlippery, PlatformFire, PlatformVertical
+# вспомогательные функции
 from utilities import Background, sprite_distance, load_image, activate_skill, skill_check
 
 # музыка
@@ -22,6 +30,7 @@ pygame.mixer.music.set_volume(0.5)
 # рабочие классы/функции
 ########################################################################################################################
 
+# кровавый ободок
 class Hp_status(pygame.sprite.Sprite):
     def __init__(self, group):
         pygame.sprite.Sprite.__init__(self, group)
@@ -38,14 +47,14 @@ class Button(pygame.sprite.Sprite):
     def __init__(self, group, coords, size, description, linked_page=False):
         super().__init__(group)
 
-        # цвет всех кнопок (можно менять)
+        # цвет всех кнопок
         self.image = pygame.Surface(size)
         self.image.fill(pygame.Color("orange"))
 
         pygame.draw.rect(self.image, pygame.Color("brown"),
                          [0, 0] + size, 5)
 
-        # текст (можно менять настройки)
+        # текст
         f1 = pygame.font.SysFont('arial', 36)
         text1 = f1.render(description, True, pygame.Color("brown"))
         self.image.blit(text1, ((size[0] - text1.get_width()) // 2, (size[1] - text1.get_height()) // 2))
@@ -71,6 +80,7 @@ class Button(pygame.sprite.Sprite):
             else:
                 running = False
 
+        # нажатие esc = нажатие кнопки назад
         elif len(args) == 1 and args[0].type == pygame.KEYDOWN:
             if args[0].key == 27:
                 if self.linked_page:
@@ -104,8 +114,9 @@ class KeyRegister(pygame.sprite.Sprite):
         clicked = args and self.rect.collidepoint(pygame.mouse.get_pos())
         if clicked and args[0].type == pygame.MOUSEBUTTONDOWN:
             self.active = True
-            self.draw(pygame.Color("lime"))
+            self.draw(pygame.Color("brown"))
 
+        # запись нового значения
         elif clicked and args[0].type == pygame.KEYDOWN and self.active:
             self.nums = args[0].key
             self.key = args[0].unicode
@@ -124,6 +135,7 @@ class KeyRegister(pygame.sprite.Sprite):
             self.active = False
             self.draw(pygame.Color("orange"))
 
+    # достаёт уже установленную кнопку
     def pick_from_db(self):
         con = sqlite3.connect(os.path.join('data', 'storage.db'))
         cur = con.cursor()
@@ -162,7 +174,7 @@ class Label(pygame.sprite.Sprite):
     def update(self, *args):
         pass
 
-
+# экран "Загрузка"
 class LoadCover(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
@@ -206,9 +218,11 @@ def generate_level(l, number):
     global npc_ded
     level, count = l
     x, y = None, None
+    # 1-ый уровень
     if number == 0:
         for y in range(len(level)):
             for x in range(len(level[y])):
+                # устанавливаем на место символов соотвествующие объекты
                 if level[y][x] == '.':
                     continue
                 elif level[y][x] == '-':
@@ -233,10 +247,12 @@ def generate_level(l, number):
                 elif level[y][x] == '^':
                     a = Platform(all_sprites, platform_sprites, (x, y))
 
+    # 2-ой уровень
     elif number == 1:
         for y in range(len(level)):
             for x in range(len(level[y])):
                 x_1 = x + count
+                # устанавливаем на место символов соотвествующие объекты
                 if level[y][x] == '.':
                     continue
                 elif level[y][x] == '-':
@@ -259,11 +275,14 @@ def generate_level(l, number):
                                            main_hero)
                 elif level[y][x] == '^':
                     a = Platform(all_sprites, platform_sprites1, (x_1, y))
+
+    # 3-ий уровень
     elif number == 2:
         count *= 2
         for y in range(len(level)):
             for x in range(len(level[y])):
                 x_1 = x + count
+                # устанавливаем на место символов соотвествующие объекты
                 if level[y][x] == '.':
                     continue
                 elif level[y][x] == '-':
@@ -287,10 +306,12 @@ def generate_level(l, number):
                 elif level[y][x] == '^':
                     a = Platform(all_sprites, platform_sprites2, (x_1, y))
                     enemy1 = Boss(all_sprites, all_enemy_sprites, boss_sprites, platform_sprites2, a, main_hero)
+
+    # обучение
     elif number == 3:
         for y in range(len(level)):
             for x in range(len(level[y])):
-                x_1 = x + count
+                # устанавливаем на место символов соотвествующие объекты
                 if level[y][x] == '.':
                     continue
                 elif level[y][x] == '-':
@@ -329,12 +350,11 @@ screen = pygame.display.set_mode(size)
 running = True
 clock = pygame.time.Clock()
 
-allow = True
 BackGround = Background('forest.jpg', [0, 0])
 MenuBackGround = Background('menu.jpg', [-80, 0])
 WinBackGround = Background('win.jpg', [30, 0])
-# заготовки групп спрайтов
 
+# заготовки групп спрайтов
 # игра
 all_sprites = pygame.sprite.Group()
 all_enemy_sprites = pygame.sprite.Group()
@@ -348,6 +368,7 @@ result = pygame.sprite.Group()
 total = pygame.sprite.Group()
 boss_sprites = pygame.sprite.Group()
 
+# обучение
 education_sprites = pygame.sprite.Group()
 education_all_enemy_sprites = pygame.sprite.Group()
 education_platform_sprites = pygame.sprite.Group()
@@ -359,11 +380,14 @@ menu = pygame.sprite.Group()
 settings = pygame.sprite.Group()
 
 # загружаем кнопками:
-# настройки
-# смерт
+# смерть
 Button(result, [WIDTH // 2 - 200, 250], [350, 70], 'Выйти в меню', menu)
 Button(result, [WIDTH // 2 - 200, 350], [350, 70], 'Попробовать снова', all_sprites)
 Label(result, [WIDTH // 2 - 260, 30], 'calibri', 'КОНЕЦ ИГРЫ', font_size=90)
+
+# победу
+Button(total, [WIDTH // 2 - 200, 150], [350, 70], 'Выйти')
+Label(total, [WIDTH // 2 - 220, 30], 'calibri', 'победа', font_size=120)
 
 # настройки
 Button(settings, [0, 0], [40, 40], '←', menu)
@@ -380,8 +404,6 @@ KeyRegister(settings, [WIDTH // 2 - 200, 270], 'Вправо')
 Label(settings, [WIDTH // 2 - 480, 330], 'arial', 'Заморозка времени')
 KeyRegister(settings, [WIDTH // 2 - 200, 330], 'Карта')
 
-Button(total, [WIDTH // 2 - 200, 150], [350, 70], 'Выйти')
-Label(total, [WIDTH // 2 - 220, 30], 'calibri', 'победа', font_size=120)
 # меню
 Label(menu, [WIDTH // 2 - 380, 50], 'Comic Sans MS', 'ЗАБАВНЫЕ ПРИКЛЮЧЕНИЯ', font_size=50)
 
@@ -395,6 +417,7 @@ Button(menu, [0, 0], [40, 40], '←')
 Button(about, [0, 0], [40, 40], '←', menu)
 Label(about, [60, 50], 'arial', '"Забавные приключения" - компьютерная игра платформер:)', font_size=30)
 Label(about, [60, 100], 'arial', '"Цель  игрока -  победить всех мобов на большой карте!', font_size=30)
+
 # игру
 button_in_game = Button(all_sprites, [0, 0], [40, 40], '←', menu)
 ed_button = Button(education_sprites, [0, 0], [40, 40], '←', menu)
@@ -414,14 +437,16 @@ all_sprites.remove(load_cover)
 
 tick = clock.tick(60) / 1000
 
+# заносим уровни
 board1 = generate_level(load_level('map.txt', 0), 0)
 board2 = generate_level(load_level('map2.txt', 1), 1) * 2
 board3 = generate_level(load_level('map3.txt', 2), 2) * 2
 education_board = generate_level(load_level('map_education.txt', 0), 3)
 
+# статусы
 npc_visited = False
 fire = True
-
+allow = True
 npc_visited = False
 fire = True
 fire_hero = True
@@ -454,6 +479,8 @@ if __name__ == '__main__':
                     pause = False
                 else:
                     pause = True
+
+            # стрельба игрока
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if fire_hero:
                     bullet = Bullet(0, 0, main_hero.position.x,
@@ -464,7 +491,7 @@ if __name__ == '__main__':
                     fire_hero = False
                     bullet.fire_timer_hero = pygame.time.get_ticks()
 
-            # карта (игра замерзает)
+            # заморозка времени
             if event.type == pygame.KEYDOWN and event.key == main_hero.get_from_db('Карта') and \
                     active_sprites == all_sprites and skill_check('заморозка времени'):
                 for i in enemy_sprites:
@@ -488,7 +515,7 @@ if __name__ == '__main__':
         elif board2 + 300 <= main_hero.rect.x - null_object.rect.x:
             main_hero.platform_sprite_group = [platform_sprites2]
 
-        # фон (на else можно поменять фон меню)
+        # фон
         if active_sprites == all_sprites:
             screen.blit(BackGround.image, BackGround.rect)
         elif active_sprites != total:
@@ -496,6 +523,7 @@ if __name__ == '__main__':
         else:
             screen.blit(WinBackGround.image, WinBackGround.rect)
 
+        # встреча с дедом
         if sprite_distance(npc_ded.rect, main_hero.rect, 130) and not npc_ded.npc_visited and main_hero.allow:
             starttime = pygame.time.get_ticks()
             timer_npc[0] = False
@@ -526,17 +554,16 @@ if __name__ == '__main__':
         # работа с координатами
         if not main_hero.allow and active_sprites == all_sprites:
             all_sprites.update(null_object.rect.x, null_object.rect.y)
-
             # натянуть 'загрузку'
             if load_cover not in all_sprites:
                 load_cover = LoadCover(all_sprites)
         else:
             active_sprites.update()
-
             # снять 'загрузку'
             if load_cover in all_sprites:
                 all_sprites.remove(load_cover)
 
+        # стрельба врагов
         for enemy in all_enemy_sprites:
             if not pause:
                 if type(enemy) == Boss or type(enemy) == EnemyRangeFly:
@@ -580,7 +607,7 @@ if __name__ == '__main__':
                     fire_hero = True
                     bullet.fire_timer_hero = 0
 
-            # Стрельба летающих нпс
+        # Стрельба летающих нпс
         if not pause:
             for bullet in bullets_hero[:]:
                 bullet.update()
@@ -590,6 +617,8 @@ if __name__ == '__main__':
 
             for bullet in bullets_hero:
                 bullet.draw(screen)
+
+        # пустой update, чтобы всё двигалось одновременно
         active_sprites.update()
 
         # если экран игры
@@ -605,6 +634,7 @@ if __name__ == '__main__':
             main_hero.last_position = main_hero.rect
             main_hero.position = main_hero.rect
 
+        # если экран обучения
         elif active_sprites == education_sprites:
             education_camera.update(education_main_hero)
             # обновляем положение всех спрайтов
@@ -613,11 +643,15 @@ if __name__ == '__main__':
                     education_camera.apply(sprite)
             education_main_hero.last_position = education_main_hero.rect
             education_main_hero.position = education_main_hero.rect
-
+        
+        # отрисовать активное окно
         active_sprites.draw(screen)
+        
+        # если игра - отрисовываем кровавый ободок
         if active_sprites == all_sprites:
             hp_status.image.set_alpha((10 - main_hero.hp) * 10)
             hp_status_group.draw(screen)
+        # если умираем, то запускается окно смерти
         if main_hero.death:
             main_hero.platform_type = None
             main_hero.platform_sprite_group = [platform_sprites]
@@ -625,6 +659,8 @@ if __name__ == '__main__':
                          'Потрачено ' + str(pygame.time.get_ticks() // 1000) + ' секунд(ы)', font_size=80)
             active_sprites = result
             main_hero.death = False
+        
+        # если побеждаем, то запускается окно победы
         if not boss_sprites:
             active_sprites = total
         pygame.display.flip()
@@ -637,7 +673,6 @@ if __name__ == '__main__':
                          (main_hero.rect.x - null_object.rect.x, 'герой')).fetchall()
     result = cur.execute("""UPDATE saved_coordinates SET y = ? WHERE tag = ?""",
                          (main_hero.rect.y - null_object.rect.y, 'герой')).fetchall()
-
 
     con.commit()
     con.close()
