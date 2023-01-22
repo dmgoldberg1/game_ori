@@ -4,4 +4,5 @@ yandex pygame project
 презентация
 https://docs.google.com/presentation/d/12RDNn7wvJHc_H8SD2TNY-SH1Jw6ZdRwRvvj_COP_Txo/edit?usp=sharing
 
-  
+пояснительная записка
+https://docs.google.com/document/d/1KueXAp3fE3baxUIqn_ExXxRyiSgDOMRlEtjzd-Tmdng/edit
