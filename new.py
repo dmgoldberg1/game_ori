@@ -1,19 +1,10 @@
 import os
 import sqlite3
+
 import pygame
+
 from data import timer_npc
-from nullobject import Null_Object
-from utilities import load_image, skill_check
-
-# музыка
-pygame.mixer.pre_init(44100, -16, 1, 512)
-# pygame.mixer.music.load("data\\music\\Diskoteka_Avariya_-_Novogodnyaya_48707470.mp3")
-# music_play = False
-sound_down = pygame.mixer.Sound("data\\music\\gluhoy-zvuk-padeniya-myagkogo-predmeta.wav")
-sound_down.set_volume(0.8)
-# pygame.mixer.music.play(-1)
-# pygame.mixer.music.stop()
-
+from utilities import load_image, move_to_the_point
 
 # настройки окна
 size = WIDHT, HEIGHT = 1000, 600
@@ -36,22 +27,13 @@ class MainHero(pygame.sprite.Sprite):
     # print(image.get_rect())
     image = pygame.transform.scale(image, (151 // 2, 186 // 2))
 
-    def __init__(self, group, platform_sprite_group, null_object):
+    def __init__(self, group, platform_sprite_group):
         super().__init__(group)
         self.group = group
         self.platform_sprite_group = platform_sprite_group
         self.state = {'на земле': True,
                       'карабкается': False}
-
-        # работа с анимацией
-        self.moving_statuses = {'straight': [True, 'animation\\mainhero2\\mainhero\\straight\\', 12],
-                                'left': [True, 'animation\\mainhero2\\mainhero\\left\\', 8],
-                                'right': [True, 'animation\\mainhero2\\mainhero\\right\\', 8]}
-        self.image = load_image("animation\\mainhero2\\mainhero\\straight\\1.png")
-        print('aaeaa', self.image.get_rect())
-        self.image = pygame.transform.scale(self.image, (50, 75))
-        self.animation_counter = 1
-        self.status_direct = 'straight'
+        self.image = MainHero.image
 
         # константы
         self.continue_moving_x = False
@@ -61,9 +43,6 @@ class MainHero(pygame.sprite.Sprite):
         self.button_lr_pressed = False
         self.pause = False
         self.allow = False
-        self.null_object = null_object
-        self.jump_count = 1 + skill_check('двойной прыжок')
-        self.death = False
 
         # игровые моменты
         self.allow = False
@@ -73,8 +52,10 @@ class MainHero(pygame.sprite.Sprite):
 
         # расположение на экране
         self.rect = self.image.get_rect()
-        self.rect.x = 150
-        self.rect.y = 200
+        print('wwwww' ,self.rect)
+        self.rect.x = 0
+        self.rect.y = 0
+        move_to_the_point(self, 'герой')
 
         # характеритики
         self.hero_widht = self.image.get_rect()[2]
@@ -87,7 +68,6 @@ class MainHero(pygame.sprite.Sprite):
         self.y_vel = 0
 
         self.mask = pygame.mask.from_surface(self.image)
-        print('sdgsfdgsergdsweg',self.mask.get_rect())
 
         # up, down кнопки
         self.ud_buttons = [self.get_from_db('Прыжок'), 1073741906]
@@ -96,23 +76,6 @@ class MainHero(pygame.sprite.Sprite):
                            self.get_from_db('Вправо'): 8,
                            1073741904: -8,
                            1073741903: 8}
-
-    def animation_image(self, type_of_moving):
-        for key in self.moving_statuses.keys():
-            if key != type_of_moving:
-                self.moving_statuses[key][0] = False
-            else:
-                if not self.moving_statuses[key][0]:
-                    self.moving_statuses[key][0] = True
-                    self.animation_counter = 0
-        stat, name, count = self.moving_statuses[type_of_moving]
-        self.animation_counter = (self.animation_counter + 1) % count
-        self.image = load_image(f"{name}{self.animation_counter + 1}.png")
-        # self.image = load_image(f"animation\\mainhero\\straight\\1.png", colorkey=(0, 255, 0))
-        self.image = pygame.transform.scale(self.image, (50, 75))
-        self.mask = pygame.mask.from_surface(self.image)
-        self.rect.width, self.rect.height = self.image.get_rect()[2:]
-        # print('qwq',self.mask.get_rect(), self.mask.count() ,self.image.get_rect(), self.animation_counter)
 
     def get_from_db(self, db_link):
         con = sqlite3.connect(os.path.join('data', 'storage.db'))
@@ -135,9 +98,8 @@ class MainHero(pygame.sprite.Sprite):
         if self.ud_buttons != [self.get_from_db('Прыжок'), 1073741906]:
             self.ud_buttons = [self.get_from_db('Прыжок'), 1073741906]
 
-        # print(self.null_object.rect)
         # прогрузка позиции
-        if not self.allow:
+        if len(args) == 2:
             # убираем скорости
             if self.x_vel or self.y_vel:
                 self.x_vel = 0
@@ -152,26 +114,26 @@ class MainHero(pygame.sprite.Sprite):
 
             # расчёт нужного движения
             # для x'а
-            if self.rect.x - self.null_object.rect.x < result[0]:
+            if self.rect.x - args[0] < result[0]:
                 move_x = 1
-            elif self.rect.x - self.null_object.rect.x > result[0]:
+            elif self.rect.x - args[0] > result[0]:
                 move_x = -1
             else:
                 move_x = 0
-            move_x *= 10 if (result[0] - (self.rect.x - self.null_object.rect.x)) % 10 == 0 else 1
-            move_x *= 10 if (result[0] - (self.rect.x - self.null_object.rect.x)) % 100 == 0 else 1
-            move_x *= 10 if (result[0] - (self.rect.x - self.null_object.rect.x)) % 1000 == 0 else 1
+            move_x *= 10 if (result[0] - (self.rect.x - args[0])) % 10 == 0 else 1
+            move_x *= 10 if (result[0] - (self.rect.x - args[0])) % 100 == 0 else 1
+            move_x *= 10 if (result[0] - (self.rect.x - args[0])) % 1000 == 0 else 1
 
             # для y'а
-            if self.rect.y - self.null_object.rect.y < result[1]:
+            if self.rect.y - args[1] < result[1]:
                 move_y = 1
-            elif self.rect.y - self.null_object.rect.y > result[1]:
+            elif self.rect.y - args[1] > result[1]:
                 move_y = -1
             else:
                 move_y = 0
-            move_y *= 10 if (result[1] - (self.rect.y - self.null_object.rect.y)) % 10 == 0 else 1
-            move_y *= 10 if (result[1] - (self.rect.y - self.null_object.rect.y)) % 100 == 0 else 1
-            move_y *= 10 if (result[1] - (self.rect.y - self.null_object.rect.y)) % 1000 == 0 else 1
+            move_y *= 10 if (result[1] - (self.rect.y - args[1])) % 10 == 0 else 1
+            move_y *= 10 if (result[1] - (self.rect.y - args[1])) % 100 == 0 else 1
+            move_y *= 10 if (result[1] - (self.rect.y - args[1])) % 1000 == 0 else 1
 
             # if для остановки на месте назаначения
             if not move_x and not move_y:
@@ -179,18 +141,16 @@ class MainHero(pygame.sprite.Sprite):
 
             # само движение
             self.rect = self.rect.move(move_x, move_y)
-            # print('dddd', move_x, move_y)
 
         # обработка событий
         elif self.allow and args:
             if args[0].type == pygame.KEYDOWN and timer_npc[0]:
                 self.continue_moving_x = True
 
-                if self.jump_count:
+                if self.state['на земле']:
                     if args[0].key in self.ud_buttons:
                         self.y_vel = -33
                         self.state['на земле'] = False
-                        self.jump_count -= 1
 
                 if args[0].key in self.lr_buttons:
                     self.x_vel = self.lr_buttons[args[0].key]
@@ -201,13 +161,10 @@ class MainHero(pygame.sprite.Sprite):
                 self.button_lr_pressed = False
 
         # движение исходящее из события
-        elif self.allow:
+        else:
             # обработка платформы
-            print(self.platform_type)
             if self.platform_type == 'slippery':
                 self.continue_moving_x = True
-            elif self.platform_type == 'fire':
-                self.hp -= 1
             else:
                 if not self.button_lr_pressed:
                     self.continue_moving_x = False
@@ -286,15 +243,13 @@ class MainHero(pygame.sprite.Sprite):
                                 y = collide_center_right[-1][1]
                             if not platform_rect.collidepoint(self.last_position.right, self.last_position.centery):
                                 self.rect = self.rect.move(x - self.rect.x - self.rect.width,
-                                                           (y - self.rect.y - self.rect.height // 2))
+                                                       (y - self.rect.y - self.rect.height // 2))
                         # обработка пересечения с низом - правом персонажа
                         if collide_down_right:
                             print('d_r')
                             if self.state['на земле']:
                                 self.y_vel = 0
                             if not platform_rect.collidepoint(self.last_position.right, self.last_position.bottom):
-                                sound_down.play()
-                                self.platform_type = platform.platform_type
                                 print(collide_down_right)
                                 self.y_vel = 0
                                 self.state['на земле'] = True
@@ -309,8 +264,6 @@ class MainHero(pygame.sprite.Sprite):
                             if self.state['на земле']:
                                 self.y_vel = 0
                             if not platform_rect.collidepoint(self.last_position.left, self.last_position.bottom):
-                                sound_down.play()
-                                self.platform_type = platform.platform_type
                                 print(collide_down_left)
                                 self.y_vel = 0
                                 self.state['на земле'] = True
@@ -368,7 +321,6 @@ class MainHero(pygame.sprite.Sprite):
                                           platform_rect.collidepoint(self.position.right, self.position.bottom)])
             if any(filter(lambda x: x[1] or x[2], platforms)):
                 self.state['на земле'] = True
-                self.jump_count = 1 + skill_check('двойной прыжок')
             else:
                 self.state['на земле'] = False
 
@@ -376,36 +328,11 @@ class MainHero(pygame.sprite.Sprite):
             if self.in_air:
                 self.state['на земле'] = False
 
-            # обновление изображения
-            if self.position.x == self.last_position.x:
-                self.animation_image('straight')
-                self.status_direct = 'straight'
-            elif self.position.x > self.last_position.x:
-                self.animation_image('right')
-                self.status_direct = 'right'
-            elif self.position.x < self.last_position.x:
-                self.animation_image('left')
-                self.status_direct = 'left'
-
-
             # упал - умер - возродился
             # теперь: набрал большую скорость - умер - возродился
-            if self.y_vel > 100 or self.hp <= 0:
+            if self.y_vel > 100:
                 self.allow = False
-                self.hp = 10  # сохраняем позицию игрока
-                con = sqlite3.connect(os.path.join('data', 'storage.db'))
-                cur = con.cursor()
-
-                dx = 150
-                dy = 200
-                result = cur.execute("""UPDATE saved_coordinates SET x = ? WHERE tag = ?""", (dx, 'герой')).fetchall()
-                result = cur.execute("""UPDATE saved_coordinates SET y = ? WHERE tag = ?""", (dy, 'герой')).fetchall()
-
-                con.commit()
-                con.close()
-
-                self.death = True
-
+                self.hp = 10
 
             # запоминаем старую позицию
             self.last_position = self.position
@@ -414,8 +341,7 @@ class MainHero(pygame.sprite.Sprite):
 
 
 # добавление героя в спрайты
-null_object = Null_Object(all_sprites)
-MainHero(all_sprites, platform_sprites, null_object)
+MainHero(all_sprites, platform_sprites)
 
 # запуск симуляции
 if __name__ == '__main__':
@@ -438,3 +364,4 @@ if __name__ == '__main__':
         pygame.display.flip()
 
     pygame.quit()
+
