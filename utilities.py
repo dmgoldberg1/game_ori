@@ -1,7 +1,10 @@
+# импорты:
+# работа с БД и файлами
 import os
-import sys
-import pygame
 import sqlite3
+# структура игры
+import pygame
+import sys
 
 
 # создание фона
@@ -32,6 +35,7 @@ def load_image(name, colorkey=None):
     return image
 
 
+# проверка на близость объектов
 def sprite_distance(rect1, rect2, dist):
     x1, y1 = rect1.topleft
     x2, y2 = rect2.topleft
@@ -41,6 +45,7 @@ def sprite_distance(rect1, rect2, dist):
         return False
 
 
+# сдвиг героя на сохранённую координату
 def move_to_the_point(obj, db_tag):
     con = sqlite3.connect(os.path.join('data', 'storage.db'))
     cur = con.cursor()
@@ -50,6 +55,7 @@ def move_to_the_point(obj, db_tag):
     obj.rect = obj.rect.move(*result[0])
 
 
+# проверка на наличие способности
 def skill_check(skill_name):
     con = sqlite3.connect(os.path.join('data', 'storage.db'))
     cur = con.cursor()
@@ -59,6 +65,7 @@ def skill_check(skill_name):
     return bool(result)
 
 
+# функция даёт доступ к способности
 def activate_skill(skill_name):
     con = sqlite3.connect(os.path.join('data', 'storage.db'))
     cur = con.cursor()
