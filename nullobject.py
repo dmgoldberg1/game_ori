@@ -2,7 +2,7 @@ import pygame
 
 from utilities import load_image
 
-
+# нулевой объект, благодаря которому можно определять глобальное положение объектов
 class Null_Object(pygame.sprite.Sprite):
     # картинка
     image = load_image("cat_hero.png", colorkey=(255, 255, 255))
@@ -13,6 +13,7 @@ class Null_Object(pygame.sprite.Sprite):
         super().__init__(group)
         # расположение на экране
         self.image = Null_Object.image
+        # прозрачный объект
         self.image.set_alpha(0)
         self.rect = self.image.get_rect()
         self.rect.x = 0
