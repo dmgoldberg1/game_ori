@@ -9,7 +9,7 @@ all_sprites = pygame.sprite.Group()
 
 WIDTH, HEIGHT = 1000, 600
 
-
+# стоячий нпс, вызывающий диалоговое окно и дает навыки
 class NPC(pygame.sprite.Sprite):
     image = load_image("animation\\npc.png", colorkey=(255, 255, 255))
     # print(image.get_rect())
@@ -30,7 +30,7 @@ class NPC(pygame.sprite.Sprite):
         self.text_surface = self.npc_font.render(text, True, (255, 255, 255))
 
 
-# npc jgk
+# npc - ходячий и наносит урон при пересечении
 class EnemyMelee(pygame.sprite.Sprite):
     def __init__(self, group, special_group, special_group1, platform_sprite_group, platform, main_hero):
         super().__init__(group)
@@ -74,18 +74,16 @@ class EnemyMelee(pygame.sprite.Sprite):
         if not self.pause:
             if not args:
                 self.main_hero_pos = self.main_hero.rect
+                # рассчитываем расстояние между нпс и персонажем
                 s = ((self.rect.x - self.main_hero_pos.x) ** 2 + (self.rect.y - self.main_hero_pos.y) ** 2) ** 0.5
                 # print(s)
 
                 self.position = pygame.Rect(self.rect)
-                # if self.platform.rect.x <= self.position.x <= self.platform.rect.x + 10:
-                #     self.direction = 0
-                # elif self.platform.rect.x + self.platform.rect.w - 10 <= self.position.x <= self.platform.rect.x + self.platform.rect.w:
-                #     self.direction = 1
-                #     self.rect.x += self.vel.x
+x
                 if self.hp <= 0:
                     self.kill()
-
+                
+                # область взаимодействия
                 if s < 500:
                     if round(self.main_hero_pos.x + self.main_hero_pos.w // 2) == round(self.position.x):
                         self.vel.x = 0
@@ -102,7 +100,8 @@ class EnemyMelee(pygame.sprite.Sprite):
                     else:
                         self.vel.y += self.gravity
                     # print(self.vel.y)
-                # print(self.state['на земле'], self.rect.y)
+                
+                # если персонаж далеко
                 else:
                     if self.state['на земле']:
                         self.vel.y = 0
@@ -113,6 +112,8 @@ class EnemyMelee(pygame.sprite.Sprite):
                 self.rect.x += self.vel.x
 
                 platforms = []
+                
+                # взаимодействие с платформами
                 for i in self.platform_sprite_group:
                     # print(i.mask.get_bounding_rects()[0])
                     a, b, c, d = i.mask.get_bounding_rects()[0][:4]
@@ -188,7 +189,8 @@ class EnemyMelee(pygame.sprite.Sprite):
 
                     self.position = pygame.Rect(self.rect)
                 self.last_position = self.position
-
+                
+                # нанесение урона
                 if not self.main_hero.hit:
                     if pygame.sprite.collide_mask(self, self.main_hero):
                         # print('aaaaaaa')
@@ -204,6 +206,7 @@ class EnemyMelee(pygame.sprite.Sprite):
                 # self.rect.center = self.pos  # Updates
 
 
+# npc - летающий и наносит урон снарядами
 class EnemyRangeFly(pygame.sprite.Sprite):
     def __init__(self, group, special_group, special_group1, platform_sprite_group, platform, main_hero):
         super().__init__(group)
@@ -233,6 +236,8 @@ class EnemyRangeFly(pygame.sprite.Sprite):
         if not self.pause:
             if not args:
                 self.main_hero_pos = self.main_hero.rect
+                
+                # рассчитываем расстояние между нпс и персонажем
                 s = ((self.rect.x - self.main_hero_pos.x) ** 2 + (self.rect.y - self.main_hero_pos.y) ** 2) ** 0.5
                 # print(s)
 
@@ -240,6 +245,7 @@ class EnemyRangeFly(pygame.sprite.Sprite):
                 if self.hp <= 0:
                     self.kill()
 
+                # область взаимодействия
                 if s < 500:
 
                     if abs(round(self.main_hero_pos.x + self.main_hero_pos.w // 2) - round(self.position.x)) <= 200:
@@ -271,7 +277,8 @@ class EnemyRangeFly(pygame.sprite.Sprite):
                     self.rect.y += self.vel.y
                     self.rect.x += self.vel.x
                 # Causes the enemy to change directions upon reaching the end of screen
-
+                
+                # взаимодействие с платформами
                 for i in self.platform_sprite_group:
                     # print(i.mask.get_bounding_rects()[0])
                     a, b, c, d = i.mask.get_bounding_rects()[0][:4]
@@ -374,7 +381,7 @@ class EnemyRangeFly(pygame.sprite.Sprite):
                         self.state['на земле'] = False
                     self.last_position = pygame.Rect(self.rect)
 
-
+# класс снарядов
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x_enemy, y_enemy, x_hero, y_hero, group, platform_sprite_group, status=False):
         super().__init__(group)
@@ -428,7 +435,7 @@ class Bullet(pygame.sprite.Sprite):
         bullet_rect = self.image.get_rect(center=self.pos)
         surf.blit(self.image, bullet_rect)
 
-
+# npc - ходячий и наносит урон при пересечении и выпускает снаряды - босс
 class Boss(pygame.sprite.Sprite):
     def __init__(self, group, special_group, special_group1, platform_sprite_group, platform, main_hero):
         super().__init__(group)
@@ -469,10 +476,6 @@ class Boss(pygame.sprite.Sprite):
         self.add(special_group1)
 
     def update(self, *args):
-
-        # Causes the enemy to change directions upon reaching the end of screen
-        # self.rect = self.rect.move(self.vel.x, self.vel.y)
-
         if not self.pause:
             if not args:
                 self.main_hero_pos = self.main_hero.rect
@@ -482,13 +485,8 @@ class Boss(pygame.sprite.Sprite):
                 self.position = pygame.Rect(self.rect)
                 if self.hp <= 0:
                     self.kill()
-                # if self.platform.rect.x <= self.position.x <= self.platform.rect.x + 10:
-                #     self.direction = 0
-                # elif self.platform.rect.x + self.platform.rect.w - 10 <= self.position.x <= self.platform.rect.x + self.platform.rect.w:
-                #     self.direction = 1
-                #     self.rect.x += self.vel.x
-                # print('BOSS pos', self.position.x)
-
+                
+                # область взаимодействия
                 if s < 1000:
                     if round(self.main_hero_pos.x + self.main_hero_pos.w // 2) == round(self.position.x):
                         self.vel.x = 0
@@ -512,6 +510,7 @@ class Boss(pygame.sprite.Sprite):
                 # print(self.state['на земле'], self.rect.y)
 
                 platforms = []
+                # взаимодействие с платформами
                 for i in self.platform_sprite_group:
                     # print(i.mask.get_bounding_rects()[0])
                     a, b, c, d = i.mask.get_bounding_rects()[0][:4]
@@ -587,7 +586,8 @@ class Boss(pygame.sprite.Sprite):
 
                     self.position = pygame.Rect(self.rect)
                 self.last_position = self.position
-
+                
+                # нанесение урона
                 if pygame.sprite.collide_mask(self, self.main_hero):
                     # print('aaaaaaa')
                     self.main_hero.hp -= 1
