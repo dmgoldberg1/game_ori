@@ -1,4 +1,4 @@
-from platform import Platform
+from platform_game import Platform
 
 import pygame
 from mainhero import MainHero

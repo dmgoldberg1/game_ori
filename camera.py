@@ -1,4 +1,4 @@
-from platform import Platform, PlatformSlippery, PlatformFire
+from platform_game import Platform, PlatformSlippery, PlatformFire
 
 WIDTH, HEIGHT = 1000, 600
 

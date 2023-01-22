@@ -13,7 +13,7 @@ from npc import NPC, EnemyMelee, EnemyRangeFly, Bullet, Boss
 from nullobject import Null_Object
 # import pygame_ai as pai
 # классы-работники
-from platform import Platform, PlatformSlippery, PlatformFire, PlatformVertical
+from platform_game import Platform, PlatformSlippery, PlatformFire, PlatformVertical
 from utilities import Background, sprite_distance, load_image, activate_skill, skill_check
 
 # музыка
